@@ -6,7 +6,7 @@ compile_commands.json
 conan_ycm_flags.json
 
 *.user
-
+*.kdev4
 *.cmake
 
 # From https://github.com/github/gitignore/
