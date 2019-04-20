@@ -36,6 +36,22 @@ TEST(ArrayTest, AssignArrayTest)
     ASSERT_EQ(array_init.size(), 0);
 }
 
+TEST(ArrayTest, AccessTest)
+{
+    Array<int> array { 0, 1, 2, 3, 4, 5, 6, 7, 8, 9 };
+
+    try {
+        const int var = array[66];
+        (void)(var);
+    } catch (std::out_of_range& exception) {
+        ASSERT_EQ(exception.what(), std::string("CppADS::Array<T>::operator[]: index is out of range"));
+    }
+
+    array[5] = 50;
+    int var = array[5];
+    ASSERT_EQ(var, 50);
+}
+
 TEST(ArrayTest, InsertTest)
 {
     Array<int> array {0, 1, 2, 3, 4, 5, 6, 7};

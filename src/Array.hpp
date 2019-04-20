@@ -181,7 +181,7 @@ template<typename T>
 T& CppADS::Array<T>::operator[](size_t index)
 {
     if (index >= m_size)
-        throw std::out_of_range("T& CppADS::Array<T>::operator[]: index is out of range");
+        throw std::out_of_range("CppADS::Array<T>::operator[]: index is out of range");
     return m_data[index];
 }
 
@@ -189,7 +189,7 @@ template<typename T>
 const T& CppADS::Array<T>::operator[](size_t index) const
 {
     if (index >= m_size)
-        throw std::out_of_range("const T& CppADS::Array::operator[] const: index is out of range");
+        throw std::out_of_range("CppADS::Array<T>::operator[]: index is out of range");
     return m_data[index];
 }
 
