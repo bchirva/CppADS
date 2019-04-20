@@ -44,6 +44,12 @@ TEST(ArrayTest, InsertTest)
     array.insert(100, 0);
     array.insert(9000, array.size());
 
+    try {
+        array.insert(42, 666);
+    } catch (std::out_of_range& exception) {
+        ASSERT_EQ(exception.what(), std::string("CppADS::Array<T>::insert: index is out of range"));
+    }
+
     ASSERT_EQ(array[0], 100);
     ASSERT_EQ(array[4], value);
     ASSERT_EQ(array[array.size() - 1], 9000);
@@ -61,6 +67,19 @@ TEST(ArrayTest, RemoveTest)
     array.remove(array.size() - 1);
     ASSERT_EQ(array[array.size() - 1], 6);
     ASSERT_EQ(array.size(), 4);
+
+    try {
+        array.remove(66);
+    } catch (std::out_of_range& exception) {
+        ASSERT_EQ(exception.what(), std::string("CppADS::Array<T>::remove: index is out of range"));
+    }
+
+    try {
+        array.remove(0, 66);
+    } catch (std::out_of_range& exception) {
+        ASSERT_EQ(exception.what(), std::string("CppADS::Array<T>::remove: count is out of range"));
+    }
+
     array.clear();
     ASSERT_EQ(array.size(), 0);
 }

@@ -123,6 +123,9 @@ size_t CppADS::Array<T>::size() const
 template<typename T> 
 void CppADS::Array<T>::insert(const T& value, size_t index)
 {
+    if (index > m_size)
+        throw std::out_of_range("CppADS::Array<T>::insert: index out of range");
+
     m_size++;
     std::unique_ptr<T[]> tmp = std::make_unique<T[]>(m_size);
     for (int i = 0; i < index; i++)
@@ -139,6 +142,9 @@ void CppADS::Array<T>::insert(const T& value, size_t index)
 template<typename T> 
 void CppADS::Array<T>::insert(T&& value, size_t index)
 {
+    if (index > m_size)
+        throw std::out_of_range("CppADS::Array<T>::insert: index is out of range");
+
     m_size++;
     std::unique_ptr<T[]> tmp = std::make_unique<T[]>(m_size);
     for (int i = 0; i < index; i++)
@@ -155,6 +161,11 @@ void CppADS::Array<T>::insert(T&& value, size_t index)
 template<typename T> 
 void CppADS::Array<T>::remove(size_t index, uint32_t count)
 {
+    if (index > m_size)
+        throw std::out_of_range("CppADS::Array<T>::remove: index is out of range");
+    if (count > (m_size - index))
+        throw std::out_of_range("CppADS::Array<T>::remove: count is out of range");
+
     m_size -= count;
     std::unique_ptr<T[]> tmp = std::make_unique<T[]>(m_size);
 
@@ -170,7 +181,7 @@ template<typename T>
 T& CppADS::Array<T>::operator[](size_t index)
 {
     if (index >= m_size)
-        throw std::out_of_range("T& CppADS::Array<T>::operator[]: index out of range");
+        throw std::out_of_range("T& CppADS::Array<T>::operator[]: index is out of range");
     return m_data[index];
 }
 
@@ -178,7 +189,7 @@ template<typename T>
 const T& CppADS::Array<T>::operator[](size_t index) const
 {
     if (index >= m_size)
-        throw std::out_of_range("const T& CppADS::Array::operator[] const: index out of range");
+        throw std::out_of_range("const T& CppADS::Array::operator[] const: index is out of range");
     return m_data[index];
 }
 
