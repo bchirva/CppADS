@@ -56,39 +56,43 @@ namespace CppADS
 template<typename T> 
 CppADS::Array<T>::Array(const Array<T>& copy)
 {
-    m_size = copy.size;
+    m_size = copy.m_size;
     m_data.reset(new T[m_size]);
     for (int i = 0; i < m_size; i++)
     {
-        m_data[i] = copy.data[i];
+        m_data[i] = copy.m_data[i];
     }
 }
 
 template<typename T> 
 CppADS::Array<T>::Array(Array<T>&& move)
 {
-    m_size = std::move(move.size);
+    m_size = std::move(move.m_size);
     m_data = std::move(move.m_data);
+    move.m_size = 0;
 }
 
 template<typename T> 
 CppADS::Array<T>::Array(std::initializer_list<T> init_list)
 {
     m_size = init_list.size();
-    for (int i = 0; i < m_size; i++)
+    m_data.reset(new T[m_size]);
+    int i = 0;
+    for(auto it = init_list.begin(); it != init_list.end(); it++)
     {
-        m_data[i] = init_list[i];
+        m_data[i] = *it;
+        i++;
     }
 }
 
 template<typename T> 
 CppADS::Array<T>& CppADS::Array<T>::operator=(const Array<T>& copy)
 {
-    m_size = copy.size;
+    m_size = copy.m_size;
     m_data.reset(new T[m_size]);
     for (int i = 0; i < m_size; i++)
     {
-        m_data[i] = copy.data[i];
+        m_data[i] = copy.m_data[i];
     }
     return *this;
 }
@@ -96,8 +100,9 @@ CppADS::Array<T>& CppADS::Array<T>::operator=(const Array<T>& copy)
 template<typename T> 
 CppADS::Array<T>& CppADS::Array<T>::operator=(Array<T>&& move)
 {
-    m_size = std::move(move.size);
+    m_size = std::move(move.m_size);
     m_data = std::move(move.m_data);
+    move.m_size = 0;
     return *this;
 }
 
