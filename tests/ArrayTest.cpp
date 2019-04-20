@@ -36,6 +36,35 @@ TEST(ArrayTest, AssignArrayTest)
     ASSERT_EQ(array_init.size(), 0);
 }
 
+TEST(ArrayTest, InsertTest)
+{
+    Array<int> array {0, 1, 2, 3, 4, 5, 6, 7};
+    int value { 3 };
+    array.insert(value, 3);
+    array.insert(100, 0);
+    array.insert(9000, array.size());
+
+    ASSERT_EQ(array[0], 100);
+    ASSERT_EQ(array[4], value);
+    ASSERT_EQ(array[array.size() - 1], 9000);
+    ASSERT_EQ(array.size(), 11);
+}
+
+TEST(ArrayTest, RemoveTest)
+{
+    Array<int> array {0, 1, 2, 3, 4, 5, 6, 7};
+
+    array.remove(3);
+    ASSERT_EQ(array[3], 4);
+    array.remove(0, 2);
+    ASSERT_EQ(array[2], 5);
+    array.remove(array.size() - 1);
+    ASSERT_EQ(array[array.size() - 1], 6);
+    ASSERT_EQ(array.size(), 4);
+    array.clear();
+    ASSERT_EQ(array.size(), 0);
+}
+
 int main(int argc, char** argv)
 {
     testing::InitGoogleTest(&argc, argv);

@@ -124,7 +124,7 @@ template<typename T>
 void CppADS::Array<T>::insert(const T& value, size_t index)
 {
     m_size++;
-    std::unique_ptr<T[]> tmp = std::make_unique<T[]>(new T[m_size]);
+    std::unique_ptr<T[]> tmp = std::make_unique<T[]>(m_size);
     for (int i = 0; i < index; i++)
         tmp[i] = m_data[i];
 
@@ -140,7 +140,7 @@ template<typename T>
 void CppADS::Array<T>::insert(T&& value, size_t index)
 {
     m_size++;
-    std::unique_ptr<T[]> tmp = std::make_unique<T[]>(new T[m_size]);
+    std::unique_ptr<T[]> tmp = std::make_unique<T[]>(m_size);
     for (int i = 0; i < index; i++)
         tmp[i] = m_data[i];
 
@@ -155,8 +155,8 @@ void CppADS::Array<T>::insert(T&& value, size_t index)
 template<typename T> 
 void CppADS::Array<T>::remove(size_t index, uint32_t count)
 {
-    m_size =- count;
-    std::unique_ptr<T[]> tmp = std::make_unique<T[]>(new T[m_size]);
+    m_size -= count;
+    std::unique_ptr<T[]> tmp = std::make_unique<T[]>(m_size);
 
     for (int i = 0; i < index; i++)
         tmp[i] = m_data[i];
