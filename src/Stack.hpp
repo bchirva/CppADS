@@ -39,13 +39,14 @@ namespace CppADS
 
     private:
 
-        struct Cell
+        struct Node
         {
-            std::shared_ptr<Cell> Next { nullptr };
             T Value;
+            std::unique_ptr<Node> Next { nullptr };
+            Node(T _value, std::unique_ptr<Node> _next) : Value(_value), Next(std::move(_next)) {}
         };
 
-        std::unique_ptr<Cell> m_head { nullptr };   ///< Pointer to the top of the stack
+        std::unique_ptr<Node> m_head { nullptr };   ///< Pointer to the top of the stack
         size_t m_size { 0 };                        ///< Stack size
     };
 }
@@ -53,6 +54,7 @@ namespace CppADS
 template<class T>
 CppADS::Stack<T>::Stack(const Stack<T>& copy)
 {
+    m_size = copy.m_size; 
 
 }
 
@@ -77,37 +79,47 @@ CppADS::Stack<T>& CppADS::Stack<T>::operator=(Stack<T>&& move)
 template<class T>
 CppADS::Stack<T>::Stack(std::initializer_list<T> init_list)
 {
+    m_size = init_list.size();
 
+    for (auto it = init_list.begin(); it != init_list.end(); it++)
+    {
+        push(*it);
+    }
 }
 
 template<class T>
 void CppADS::Stack<T>::clear()
 {
-
+    m_head.reset(nullptr);
+    m_size = 0;
 }
 
 template<class T>
 size_t CppADS::Stack<T>::size() const
 {
-
+    return m_size;
 }
 
 template<class T>
 void CppADS::Stack<T>::push(const T& value)
 {
-
+    std::unique_ptr<Node> new_top = std::make_unique<Node>(value, std::move(m_head));
+    m_head = std::move(new_top);
 }
 
 template<class T>
 void CppADS::Stack<T>::push(T&& value)
 {
-
+    std::unique_ptr<Node> new_top = std::make_unique<Node>(std::move(value), std::move(m_head));
+    m_head = std::move(new_top);
 }
 
 template<class T>
 T CppADS::Stack<T>::pop()
 {
-
+    T value = std::move(m_head.Value);
+    m_head = std::move(m_head->Next);
+    return value;
 }
 
 
