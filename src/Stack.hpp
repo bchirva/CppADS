@@ -33,9 +33,15 @@ namespace CppADS
         /// @brief Overloaded method
         void push(T&& value);
 
-        /// @brief Remove and return last inserted value
+        /// @brief Get last inserted value
         /// @return value on top of the stack
-        T pop();
+        T& top();
+
+        /// @brief Overloaded method
+        const T& top() const;
+
+        /// @brief Remove last inserted value
+        void  pop();
 
     private:
 
@@ -144,15 +150,25 @@ void CppADS::Stack<T>::push(T&& value)
 }
 
 template<class T>
-T CppADS::Stack<T>::pop()
+T& CppADS::Stack<T>::top()
+{
+    return m_head->Value;
+}
+
+template<class T>
+const T& CppADS::Stack<T>::top() const
+{
+    return m_head->Value;
+}
+
+template<class T>
+void CppADS::Stack<T>::pop()
 {
     if (m_size == 0)
-        throw std::out_of_range("CppADS::Stack<T>::pop: stack is empty")
+        throw std::out_of_range("CppADS::Stack<T>::pop: stack is empty");
 
     m_size--;
-    T value (std::move(m_head->Value));
     m_head = std::move(m_head->Next);
-    return value;
 }
 
 
