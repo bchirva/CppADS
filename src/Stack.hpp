@@ -27,7 +27,7 @@ namespace CppADS
         size_t size() const override;
 
         /// @brief Push value on top of the stack
-        /// @param value inserted value
+        /// @param value added value
         void push(const T& value);
 
         /// @brief Overloaded method
@@ -40,7 +40,7 @@ namespace CppADS
         /// @brief Overloaded method
         const T& top() const;
 
-        /// @brief Remove last inserted value
+        /// @brief Remove top item 
         void  pop();
 
     private:
@@ -64,11 +64,11 @@ CppADS::Stack<T>::Stack(const Stack<T>& copy)
     m_size = copy.m_size; 
     
     std::unique_ptr<Node>* self_node = &m_head;
-    std::unique_ptr<Node>* copy_node = const_cast<std::unique_ptr<Node>*>(&(copy.m_head));
+    const std::unique_ptr<Node>* copy_node = &(copy.m_head);
 
     while ((*copy_node) != nullptr)
     {
-        self_node->reset(new Node(copy_node->get()->Value));
+        *self_node = std::make_unique<Node>(copy_node->get()->Value);
 
         self_node = &(self_node->get()->Next);
         copy_node = &(copy_node->get()->Next);
@@ -90,11 +90,11 @@ CppADS::Stack<T>& CppADS::Stack<T>::operator=(const Stack<T>& copy)
     m_size = copy.m_size;
 
     std::unique_ptr<Node>* self_node = &m_head;
-    std::unique_ptr<Node>* copy_node = const_cast<std::unique_ptr<Node>*>(&(copy.m_head));
+    const std::unique_ptr<Node>* copy_node = &(copy.m_head);
 
     while ((*copy_node) != nullptr)
     {
-        self_node->reset(new Node(copy_node->get()->Value));
+        *self_node = std::make_unique<Node>(copy_node->get()->Value);
 
         self_node = &(self_node->get()->Next);
         copy_node = &(copy_node->get()->Next);
