@@ -4,6 +4,7 @@ build/
 .clang_complete
 compile_commands.json
 conan_ycm_flags.json
+.cquery
 
 *.user
 *.kdev4
