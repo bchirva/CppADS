@@ -40,7 +40,7 @@ namespace CppADS
         void dequeue();
 
         /// @brief Get first inserted value 
-        /// @return value on fron of the queue
+        /// @return value on front of the queue
         T& front();
 
         /// @brief Overloaded method
@@ -102,6 +102,7 @@ CppADS::Queue<T>::Queue(std::initializer_list<T> init_list)
 template<typename T>
 CppADS::Queue<T>& CppADS::Queue<T>::operator=(const Queue<T>& copy)
 {
+    clear();
     m_size = copy.m_size;
 
     std::shared_ptr<Node>* self_node = &m_head;
@@ -123,6 +124,7 @@ CppADS::Queue<T>& CppADS::Queue<T>::operator=(const Queue<T>& copy)
 template<typename T>
 CppADS::Queue<T>& CppADS::Queue<T>::operator=(Queue<T>&& move)
 {
+    clear();
     m_size = std::move(move.m_size);
     m_tail = std::move(move.m_tail);
     m_head = std::move(move.m_head);
@@ -140,9 +142,8 @@ size_t CppADS::Queue<T>::size() const
 template<typename T>
 void CppADS::Queue<T>::clear()
 {
-    m_tail.reset();
-    m_head.reset();
-    m_size = 0;
+    while(m_head != nullptr)
+        dequeue();
 }
 
 template<typename T>
@@ -180,23 +181,32 @@ void CppADS::Queue<T>::enqueue(T&& value)
 template<typename T>
 void CppADS::Queue<T>::dequeue()
 {
-    m_head = std::move(m_head->Next);
-    m_size--;
+    if (m_head != nullptr)
+    {
+        m_head = std::move(m_head->Next);
+        m_size--;
 
-    if(m_tail.unique())
-        m_tail.reset();
+        if(m_tail.unique())
+            m_tail.reset();
+    }
 }
 
 template<typename T>
 T& CppADS::Queue<T>::front()
 {
-    return m_head->Value;
+    if (m_head != nullptr)
+        return m_head->Value;
+    else
+        throw std::out_of_range("CppADS::Queue<T>::front: queue is empty");
 }
 
 template<typename T>
 const T& CppADS::Queue<T>::front() const
 {
-    return m_head->Value;
+    if (m_head != nullptr)
+        return m_head->Value;
+    else
+        throw std::out_of_range("CppADS::Queue<T>::front: queue is empty");
 }
 
 #endif

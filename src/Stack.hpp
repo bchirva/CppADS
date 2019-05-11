@@ -152,21 +152,32 @@ void CppADS::Stack<T>::push(T&& value)
 template<class T>
 T& CppADS::Stack<T>::top()
 {
-    return m_head->Value;
+    if (m_head != nullptr)
+    {
+        return m_head->Value;
+    }
+    else
+    {
+        throw std::out_of_range("CppADS::Stack<T>::top: stack is empty");
+    }
 }
 
 template<class T>
 const T& CppADS::Stack<T>::top() const
 {
-    return m_head->Value;
+    if (m_head != nullptr)
+    {
+        return m_head->Value;
+    }
+    else
+    {
+        throw std::out_of_range("CppADS::Stack<T>::top: stack is empty");
+    }
 }
 
 template<class T>
 void CppADS::Stack<T>::pop()
 {
-    if (m_size == 0)
-        throw std::out_of_range("CppADS::Stack<T>::pop: stack is empty");
-
     m_size--;
     m_head = std::move(m_head->Next);
 }
