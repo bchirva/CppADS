@@ -55,8 +55,8 @@ TEST(DequeTest, ModifyDequeTest)
     }
     
     ASSERT_EQ(deque.size(), 50);
-    ASSERT_EQ(deque.front(), 25);
-    ASSERT_EQ(deque.back(), 25);
+    ASSERT_EQ(deque.front(), 76);
+    ASSERT_EQ(deque.back(), 76);
 }
 
 int main(int argc, char** argv)

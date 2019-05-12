@@ -137,11 +137,11 @@ CppADS::Deque<T>& CppADS::Deque<T>::operator=(Deque<T>&& move)
 template<typename T>
 void CppADS::Deque<T>::push_back(const T& value)
 {
-    if (m_size != 0)
-    {    
-        std::shared_ptr<Node> new_item = std::make_shared<Node>(value, nullptr, m_back->Prev);
-        m_back->Next = new_item;
-        m_back = new_item;
+    if (m_back != nullptr)
+    {
+        std::shared_ptr<Node> new_node = std::make_shared<Node>(value, nullptr, m_back);
+        m_back->Next = new_node;
+        m_back = new_node;
     }
     else
     {
@@ -153,11 +153,11 @@ void CppADS::Deque<T>::push_back(const T& value)
 template<typename T>
 void CppADS::Deque<T>::push_back(T&& value)
 {
-    if (m_size != 0)
-    {    
-        std::shared_ptr<Node> new_item = std::make_shared<Node>(std::move(value), nullptr, m_back->Prev);
-        m_back->Next = new_item;
-        m_back = new_item;
+    if (m_back != nullptr)
+    {
+        std::shared_ptr<Node> new_node = std::make_shared<Node>(std::move(value), nullptr, m_back);
+        m_back->Next = new_node;
+        m_back = new_node;
     }
     else
     {
@@ -169,11 +169,12 @@ void CppADS::Deque<T>::push_back(T&& value)
 template<typename T>
 void CppADS::Deque<T>::push_front(const T& value)
 {
-    if (m_size != 0)
+
+    if (m_front != nullptr)
     {
-        std::shared_ptr<Node> new_item = std::make_shared<Node>(value, m_front->Next, nullptr);
-        m_front->Prev = new_item;
-        m_front = new_item;
+        std::shared_ptr<Node> new_node = std::make_shared<Node>(value, m_front, nullptr);
+        m_front->Prev = new_node;
+        m_front = new_node;
     }
     else
     {
@@ -185,11 +186,11 @@ void CppADS::Deque<T>::push_front(const T& value)
 template<typename T>
 void CppADS::Deque<T>::push_front(T&& value)
 {
-    if (m_size != 0)
+    if (m_front != nullptr)
     {
-        std::shared_ptr<Node> new_item = std::make_shared<Node>(std::move(value), m_front->Next, nullptr);
-        m_front->Prev = new_item;
-        m_front = new_item;
+        std::shared_ptr<Node> new_node = std::make_shared<Node>(std::move(value), m_front, nullptr);
+        m_front->Prev = new_node;
+        m_front = new_node;
     }
     else
     {
