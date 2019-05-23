@@ -3,6 +3,7 @@
 #include "Container.hpp"
 
 #include <memory>
+#include <iterator>
 
 namespace CppADS
 {
@@ -11,6 +12,20 @@ namespace CppADS
     class Array : public IContainer
     {
     public:
+        class Iterator;
+        class ConstIterator;
+        
+        using value_type = T;
+        using reference = T&;
+        using const_reference = const T&;
+        using pointer = T*;
+        using const_pointer = const T*;
+        
+        using iterator = Iterator;
+        using const_iterator = ConstIterator;
+        using reverse_iterator = std::reverse_iterator<iterator>;
+        using const_reverse_iterator = std::reverse_iterator<const_iterator>;
+
         Array() = default;                          ///< Default constructor
         ~Array() = default;                         ///< Destructor
         Array(const Array<T>& copy);                ///< Copy contructor
@@ -46,10 +61,51 @@ namespace CppADS
         
         /// @brief Const overloaded method
         const T& operator[](size_t index) const;
+
+        iterator begin();
+        const_iterator begin() const;
+        const_iterator cbegin() const;
+        iterator end();
+        const_iterator end() const;
+        const_iterator cend() const;
+        reverse_iterator rbegin();
+        const_reverse_iterator rbegin() const;
+        const_reverse_iterator crbegin() const;
+        reverse_iterator rend();
+        const_reverse_iterator rend() const;
+        const_reverse_iterator crend() const;
         
     private:
         std::unique_ptr<T[]> m_data { nullptr };      ///< Pointer to the data head on heap
         size_t m_size { 0 };                          ///< Array size        
+    };
+
+    template<typename T>
+    class Array<T>::Iterator : public std::iterator<std::random_access_iterator_tag, T>
+    {
+    public:
+        using value_type = T;
+        using reference = T&;
+        using const_reference = const T&;
+
+        reference operator*();
+        reference operator->();
+        reference operator[](int AIndex);
+
+        Iterator& operator++();
+        Iterator& operator--();
+        Iterator& operator+(int AOffset);
+        Iterator& operator-(int AOffset);
+        
+        bool operator==(const Iterator& rhs);
+        bool operator!=(const Iterator& rhs);
+        bool operator>(const Iterator& rhs);
+        bool operator<(const Iterator& rhs);
+        bool operator>=(const Iterator& rhs);
+        bool operator<=(const Iterator& rhs);
+
+    private:
+        size_t m_Index { 0 };
     };
 }
 
