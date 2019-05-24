@@ -11,14 +11,34 @@ TEST(ArrayTest, ConstructArrayTest)
     std::initializer_list<int> init_list { 0, 1, 2, 3, 4, 5, 6, 7, 8, 9 };
 
     Array<int> array_init (init_list);
-    ASSERT_EQ(array_init.size(), init_list.size());
+    //ASSERT_TRUE(array_init == init_list);
 
     Array<int> array_copy (array_init);
-    ASSERT_EQ(array_copy.size(), init_list.size());
+    ASSERT_EQ(array_copy, array_init);
     
     Array<int> array_move (std::move(array_init));
-    ASSERT_EQ(array_move.size(), init_list.size());
+    ASSERT_EQ(array_move, array_copy);
     ASSERT_EQ(array_init.size(), 0);
+}
+
+TEST(ArrayTest, IteratorsArrayTest)
+{
+    Array<int> array_init {0,1,2,3,4,5,6,7,8,9};
+
+    int value = 0;
+    for(auto it = array_init.begin(); it != array_init.end(); ++it, value++) {
+        ASSERT_EQ(*it, value);
+    }
+
+    value = 0;
+    for (auto it = array_init.cbegin(); it != array_init.cend(); ++it, value++) {
+        ASSERT_EQ(*it, value);
+    }
+
+    value = 9;
+    for (auto it = array_init.rbegin(); it != array_init.rend(); ++it, value--) {
+        ASSERT_EQ(*it, value);
+    }
 }
 
 TEST(ArrayTest, AssignArrayTest)
@@ -28,12 +48,15 @@ TEST(ArrayTest, AssignArrayTest)
 
     Array<int> array_copy;
     array_copy = array_init;
-    ASSERT_EQ(array_copy.size(), init_list.size());
+    //ASSERT_EQ(array_copy, init_list);
     
     Array<int> array_move;
     array_move = std::move(array_init);
-    ASSERT_EQ(array_move.size(), init_list.size());
+    ASSERT_EQ(array_move, array_copy);
     ASSERT_EQ(array_init.size(), 0);
+
+    Array<int> non_equal {10,11,12,13,14,15};
+    ASSERT_NE(non_equal, array_move);
 }
 
 TEST(ArrayTest, AccessTest)
