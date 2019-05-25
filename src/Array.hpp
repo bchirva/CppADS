@@ -14,13 +14,13 @@ namespace CppADS
     public:
         class Iterator;
         class ConstIterator;
-        
+
         using value_type = T;
         using reference = T&;
         using const_reference = const T&;
         using pointer = T*;
         using const_pointer = const T*;
-        
+
         using iterator = Iterator;
         using const_iterator = ConstIterator;
         using reverse_iterator = std::reverse_iterator<iterator>;
@@ -33,10 +33,10 @@ namespace CppADS
         Array<T>& operator=(const Array<T>& copy);  ///< Copy assignment operator
         Array<T>& operator=(Array<T>&& move);       ///< Move assignment operator
         Array(std::initializer_list<T> init_list);  ///< Contructor from initializer list
-        
+
         /// @brief Remove all data from container
         void clear() override;
-        
+
         /// @brief Get size of container
         /// @return element's count
         size_t size() const override;
@@ -45,20 +45,26 @@ namespace CppADS
         /// @param value inserted value
         /// @param index position to insert
         void insert(const T& value, size_t index);
-        
-        /// @brief Overloaded method 
+
+        /// @brief Overloaded method
         void insert(T&& value, size_t index);
-        
+
+        void insert(const T& value, iterator position);
+
+        void insert(T&& value, iterator position);
+
         /// @brief Remove values from container
         /// @param index position of first item to delete
         /// @param count count of deleted elements
-        void remove(size_t index, uint32_t count = 1);
+        void remove(size_t index);
+
+        void remove(iterator position);
 
         /// @brief Access to item
         /// @param index item position
         /// @return reference to value
         T& operator[](size_t index);
-        
+
         /// @brief Const overloaded method
         const T& operator[](size_t index) const;
 
@@ -101,13 +107,13 @@ namespace CppADS
         const_reverse_iterator crend() const {
             return std::reverse_iterator<ConstIterator>(m_data.get());
         };
-        
+
         bool operator==(const Array<T>& rhs) const;
         bool operator!=(const Array<T>& rhs) const;
 
     private:
         std::unique_ptr<T[]> m_data { nullptr };      ///< Pointer to the data head on heap
-        size_t m_size { 0 };                          ///< Array size        
+        size_t m_size { 0 };                          ///< Array size
     };
 
     template<typename T>
@@ -118,8 +124,9 @@ namespace CppADS
 
     public:
         Iterator(T* src_ptr) : m_ptr(src_ptr) {}
+        ~Iterator() {m_ptr = nullptr;}
 
-        Array<T>::reference operator*() { 
+        Array<T>::reference operator*() {
             return *m_ptr;
         }
         Array<T>::pointer operator->() {
@@ -145,7 +152,7 @@ namespace CppADS
             m_ptr -= AOffset;
             return *this;
         }
-        
+
         bool operator==(const Iterator& rhs) const {
             return m_ptr == rhs.m_ptr;
         }
@@ -174,8 +181,9 @@ namespace CppADS
 
     public:
         ConstIterator(T* src_ptr) : m_ptr(src_ptr) {}
+        ~ConstIterator() {m_ptr = nullptr;}
 
-        Array<T>::const_reference operator*() { 
+        Array<T>::const_reference operator*() {
             return *m_ptr;
         }
         Array<T>::const_pointer operator->() {
@@ -201,7 +209,7 @@ namespace CppADS
             m_ptr -= AOffset;
             return *this;
         }
-        
+
         bool operator==(const ConstIterator& rhs) const {
             return m_ptr == rhs.m_ptr;
         }
@@ -224,7 +232,7 @@ namespace CppADS
 
 }
 
-template<typename T> 
+template<typename T>
 CppADS::Array<T>::Array(const Array<T>& copy)
 {
     m_size = copy.m_size;
@@ -235,7 +243,7 @@ CppADS::Array<T>::Array(const Array<T>& copy)
     }
 }
 
-template<typename T> 
+template<typename T>
 CppADS::Array<T>::Array(Array<T>&& move)
 {
     m_size = std::move(move.m_size);
@@ -243,7 +251,7 @@ CppADS::Array<T>::Array(Array<T>&& move)
     move.m_size = 0;
 }
 
-template<typename T> 
+template<typename T>
 CppADS::Array<T>::Array(std::initializer_list<T> init_list)
 {
     m_size = init_list.size();
@@ -256,7 +264,7 @@ CppADS::Array<T>::Array(std::initializer_list<T> init_list)
     }
 }
 
-template<typename T> 
+template<typename T>
 CppADS::Array<T>& CppADS::Array<T>::operator=(const Array<T>& copy)
 {
     m_size = copy.m_size;
@@ -268,7 +276,7 @@ CppADS::Array<T>& CppADS::Array<T>::operator=(const Array<T>& copy)
     return *this;
 }
 
-template<typename T> 
+template<typename T>
 CppADS::Array<T>& CppADS::Array<T>::operator=(Array<T>&& move)
 {
     m_size = std::move(move.m_size);
@@ -277,20 +285,20 @@ CppADS::Array<T>& CppADS::Array<T>::operator=(Array<T>&& move)
     return *this;
 }
 
-template<typename T> 
+template<typename T>
 void CppADS::Array<T>::clear()
 {
     m_data.reset(nullptr);
     m_size = 0;
 }
 
-template<typename T> 
+template<typename T>
 size_t CppADS::Array<T>::size() const
 {
     return m_size;
 }
 
-template<typename T> 
+template<typename T>
 void CppADS::Array<T>::insert(const T& value, size_t index)
 {
     if (index > m_size)
@@ -298,18 +306,23 @@ void CppADS::Array<T>::insert(const T& value, size_t index)
 
     m_size++;
     std::unique_ptr<T[]> tmp = std::make_unique<T[]>(m_size);
-    for (int i = 0; i < index; i++)
-        tmp[i] = m_data[i];
+    auto tmp_it = tmp.get();
+    auto insert_it = begin() + index;
 
-    tmp[index] = value;
+    for(auto it = begin(); it != end(); ++it, ++tmp_it)
+    {
+        if (insert_it == it)
+        {
+            *tmp_it = std::move(value);
+            tmp_it++;
+        }
+        *tmp_it = std::move(*it);
+    }
 
-    for (int i = index + 1; i < m_size; i++)
-        tmp[i] = m_data[i - 1];
-    
     m_data = std::move(tmp);
 }
 
-template<typename T> 
+template<typename T>
 void CppADS::Array<T>::insert(T&& value, size_t index)
 {
     if (index > m_size)
@@ -317,33 +330,109 @@ void CppADS::Array<T>::insert(T&& value, size_t index)
 
     m_size++;
     std::unique_ptr<T[]> tmp = std::make_unique<T[]>(m_size);
-    for (int i = 0; i < index; i++)
-        tmp[i] = m_data[i];
+    auto tmp_it = tmp.get();
+    auto insert_it = begin() + index;
 
-    tmp[index] = std::move(value);
+    for(auto it = begin(); it != end(); ++it, ++tmp_it)
+    {
+        if (insert_it == it)
+        {
+            *tmp_it = std::move(value);
+            tmp_it++;
+        }
+        *tmp_it = std::move(*it);
+    }
 
-    for (int i = index + 1; i < m_size; i++)
-        tmp[i] = m_data[i - 1];
-    
     m_data = std::move(tmp);
 }
 
-template<typename T> 
-void CppADS::Array<T>::remove(size_t index, uint32_t count)
+template<typename T>
+void CppADS::Array<T>::insert(const T& value, iterator position)
+{
+    if (position > end() || position < begin())
+         throw std::out_of_range("CppADS::Array<T>::insert: iterator is invalid");
+
+    m_size++;
+    std::unique_ptr<T[]> tmp = std::make_unique<T[]>(m_size);
+    auto tmp_it = tmp.get();
+
+    for(auto it = begin(); it != end(); ++it, ++tmp_it)
+    {
+        if (position == it)
+        {
+            *tmp_it = value;
+            tmp_it++;
+        }
+        *tmp_it = std::move(*it);
+    }
+
+    m_data = std::move(tmp);
+}
+
+template<typename T>
+void CppADS::Array<T>::insert(T&& value, iterator position)
+{
+    if (position > end() || position < begin())
+         throw std::out_of_range("CppADS::Array<T>::insert: iterator is invalid");
+
+    m_size++;
+    std::unique_ptr<T[]> tmp = std::make_unique<T[]>(m_size);
+    auto tmp_it = tmp.get();
+
+    for(auto it = begin(); it != end(); ++it, ++tmp_it)
+    {
+        if (position == it)
+        {
+            *tmp_it = std::move(value);
+            tmp_it++;
+        }
+        *tmp_it = std::move(*it);
+    }
+
+    m_data = std::move(tmp);
+}
+
+template<typename T>
+void CppADS::Array<T>::remove(size_t index)
 {
     if (index > m_size)
         throw std::out_of_range("CppADS::Array<T>::remove: index is out of range");
-    if (count > (m_size - index))
-        throw std::out_of_range("CppADS::Array<T>::remove: count is out of range");
 
-    m_size -= count;
+    m_size--;
+    std::unique_ptr<T[]> tmp = std::make_unique<T[]>(m_size);
+    auto tmp_it = tmp.get();
+    auto remove_it = begin() + index;
+
+    for(auto it = begin(); it != end(); ++it)
+    {
+        if (it != remove_it)
+        {
+            *tmp_it = std::move(*it);
+            tmp_it++;
+        }
+    }
+
+    m_data = std::move(tmp);
+}
+
+template<typename T>
+void CppADS::Array<T>::remove(iterator position)
+{
+    if (position > end() || position < begin())
+         throw std::out_of_range("CppADS::Array<T>::remove: iterator is invalid");
+
+    m_size--;
     std::unique_ptr<T[]> tmp = std::make_unique<T[]>(m_size);
 
-    for (int i = 0; i < index; i++)
-        tmp[i] = m_data[i];
-    for (int i = index; i < m_size; i++)
-        tmp[i] = m_data[i + count];
-
+    auto tmp_it = tmp.get();
+    for(auto it = begin(); it != end(); ++it)
+    {
+        if (it != position)
+        {
+            *tmp_it = std::move(*it);
+            tmp_it++;
+        }
+    }
     m_data = std::move(tmp);
 }
 
@@ -387,22 +476,22 @@ typename CppADS::Array<T>::const_iterator CppADS::Array<T>::find(const T& value)
     return it;
 }
 
-template<typename T>        
+template<typename T>
 bool CppADS::Array<T>::operator==(const Array<T>& rhs) const
 {
-    if (this->m_size != rhs.m_size) 
+    if (this->m_size != rhs.m_size)
         return false;
 
     auto this_it = this->cbegin();
     auto rhs_it = rhs.cbegin();
-    while (this_it != this->cend() && rhs_it != rhs.cend()) 
+    while (this_it != this->cend() && rhs_it != rhs.cend())
     {
         if (*this_it != *rhs_it)
             return false;
         ++this_it;
         ++rhs_it;
     }
-    
+
     return true;
 }
 
