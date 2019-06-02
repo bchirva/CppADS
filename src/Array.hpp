@@ -4,6 +4,7 @@
 
 #include <memory>
 #include <iterator>
+#include <iostream>
 
 namespace CppADS
 {
@@ -47,6 +48,7 @@ namespace CppADS
         void insert(const T& value, size_t index);
 
         /// @brief Overloaded method
+
         void insert(T&& value, size_t index);
 
         void insert(const T& value, iterator position);
@@ -144,6 +146,14 @@ namespace CppADS
             m_ptr--;;
             return *this;
         }
+        Iterator& operator++(int) {
+            m_ptr++;
+            return *this;
+        }
+        Iterator& operator--(int) {
+            m_ptr--;;
+            return *this;
+        }
         Iterator& operator+(int AOffset){
             m_ptr += AOffset;
             return *this;
@@ -201,6 +211,14 @@ namespace CppADS
             m_ptr--;;
             return *this;
         }
+        ConstIterator& operator++(int) {
+            m_ptr++;
+            return *this;
+        }
+        ConstIterator& operator--(int) {
+            m_ptr--;;
+            return *this;
+        }
         ConstIterator& operator+(int AOffset){
             m_ptr += AOffset;
             return *this;
@@ -236,7 +254,7 @@ template<typename T>
 CppADS::Array<T>::Array(const Array<T>& copy)
 {
     m_size = copy.m_size;
-    m_data.reset(new T[m_size]);
+    m_data = std::make_unique<T[]>(m_size);
     for (int i = 0; i < m_size; i++)
     {
         m_data[i] = copy.m_data[i];
@@ -255,12 +273,11 @@ template<typename T>
 CppADS::Array<T>::Array(std::initializer_list<T> init_list)
 {
     m_size = init_list.size();
-    m_data.reset(new T[m_size]);
+    m_data = std::make_unique<T[]>(m_size);
     int i = 0;
-    for(auto it = init_list.begin(); it != init_list.end(); it++)
+    for(auto it = init_list.begin(); it != init_list.end(); it++, i++)
     {
         m_data[i] = *it;
-        i++;
     }
 }
 
@@ -268,7 +285,7 @@ template<typename T>
 CppADS::Array<T>& CppADS::Array<T>::operator=(const Array<T>& copy)
 {
     m_size = copy.m_size;
-    m_data.reset(new T[m_size]);
+    m_data = std::make_unique<T[]>(m_size);
     for (int i = 0; i < m_size; i++)
     {
         m_data[i] = copy.m_data[i];
@@ -302,24 +319,25 @@ template<typename T>
 void CppADS::Array<T>::insert(const T& value, size_t index)
 {
     if (index > m_size)
-        throw std::out_of_range("CppADS::Array<T>::insert: index out of range");
+        throw std::out_of_range("CppADS::Array<T>::insert: index is out of range");
 
-    m_size++;
-    std::unique_ptr<T[]> tmp = std::make_unique<T[]>(m_size);
+    std::unique_ptr<T[]> tmp = std::make_unique<T[]>(m_size + 1);
     auto tmp_it = tmp.get();
     auto insert_it = begin() + index;
 
-    for(auto it = begin(); it != end(); ++it, ++tmp_it)
+    for(auto data_it = begin(); data_it != end(); ++data_it)
     {
-        if (insert_it == it)
+        if (insert_it == data_it)
         {
-            *tmp_it = std::move(value);
+            *tmp_it = value;
             tmp_it++;
         }
-        *tmp_it = std::move(*it);
+        *tmp_it = std::move(*data_it);
+        tmp_it++;
     }
 
     m_data = std::move(tmp);
+    m_size++;
 }
 
 template<typename T>
@@ -328,8 +346,7 @@ void CppADS::Array<T>::insert(T&& value, size_t index)
     if (index > m_size)
         throw std::out_of_range("CppADS::Array<T>::insert: index is out of range");
 
-    m_size++;
-    std::unique_ptr<T[]> tmp = std::make_unique<T[]>(m_size);
+    std::unique_ptr<T[]> tmp = std::make_unique<T[]>(m_size + 1);
     auto tmp_it = tmp.get();
     auto insert_it = begin() + index;
 
@@ -344,6 +361,7 @@ void CppADS::Array<T>::insert(T&& value, size_t index)
     }
 
     m_data = std::move(tmp);
+    m_size++;
 }
 
 template<typename T>
@@ -352,8 +370,7 @@ void CppADS::Array<T>::insert(const T& value, iterator position)
     if (position > end() || position < begin())
          throw std::out_of_range("CppADS::Array<T>::insert: iterator is invalid");
 
-    m_size++;
-    std::unique_ptr<T[]> tmp = std::make_unique<T[]>(m_size);
+    std::unique_ptr<T[]> tmp = std::make_unique<T[]>(m_size + 1);
     auto tmp_it = tmp.get();
 
     for(auto it = begin(); it != end(); ++it, ++tmp_it)
@@ -367,6 +384,7 @@ void CppADS::Array<T>::insert(const T& value, iterator position)
     }
 
     m_data = std::move(tmp);
+    m_size++;
 }
 
 template<typename T>
@@ -375,8 +393,7 @@ void CppADS::Array<T>::insert(T&& value, iterator position)
     if (position > end() || position < begin())
          throw std::out_of_range("CppADS::Array<T>::insert: iterator is invalid");
 
-    m_size++;
-    std::unique_ptr<T[]> tmp = std::make_unique<T[]>(m_size);
+    std::unique_ptr<T[]> tmp = std::make_unique<T[]>(m_size + 1);
     auto tmp_it = tmp.get();
 
     for(auto it = begin(); it != end(); ++it, ++tmp_it)
@@ -390,6 +407,7 @@ void CppADS::Array<T>::insert(T&& value, iterator position)
     }
 
     m_data = std::move(tmp);
+    m_size++;
 }
 
 template<typename T>
@@ -398,12 +416,11 @@ void CppADS::Array<T>::remove(size_t index)
     if (index > m_size)
         throw std::out_of_range("CppADS::Array<T>::remove: index is out of range");
 
-    m_size--;
-    std::unique_ptr<T[]> tmp = std::make_unique<T[]>(m_size);
+    std::unique_ptr<T[]> tmp = std::make_unique<T[]>(m_size - 1);
     auto tmp_it = tmp.get();
     auto remove_it = begin() + index;
 
-    for(auto it = begin(); it != end(); ++it)
+    for(auto it = begin(); it != end(); it++)
     {
         if (it != remove_it)
         {
@@ -413,6 +430,7 @@ void CppADS::Array<T>::remove(size_t index)
     }
 
     m_data = std::move(tmp);
+    m_size--;
 }
 
 template<typename T>
@@ -421,10 +439,9 @@ void CppADS::Array<T>::remove(iterator position)
     if (position > end() || position < begin())
          throw std::out_of_range("CppADS::Array<T>::remove: iterator is invalid");
 
-    m_size--;
-    std::unique_ptr<T[]> tmp = std::make_unique<T[]>(m_size);
-
+    std::unique_ptr<T[]> tmp = std::make_unique<T[]>(m_size - 1);
     auto tmp_it = tmp.get();
+
     for(auto it = begin(); it != end(); ++it)
     {
         if (it != position)
@@ -434,6 +451,7 @@ void CppADS::Array<T>::remove(iterator position)
         }
     }
     m_data = std::move(tmp);
+    m_size--;
 }
 
 template<typename T>

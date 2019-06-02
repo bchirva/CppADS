@@ -1,4 +1,5 @@
 #include <gtest/gtest.h>
+#include <iostream>
 
 #include "Array.hpp"
 using CppADS::Array;
@@ -92,15 +93,16 @@ TEST(ArrayTest, AccessTest)
 TEST(ArrayTest, InsertTest)
 {
     Array<int> array {0, 1, 2, 3, 4, 5, 6, 7};
-    int value { 3 };
+    int value { -11 };
 
-    array.insert(value, 3);
-    array.insert(100, 0);
+    array.insert(value, 0);
+    array.insert(100, array.begin());
     array.insert(9000, array.size());
     array.insert(1234, array.end());
+    array.insert(789, 5);
 
-    ASSERT_EQ(array, Array<int>({100, 0, 1, 2, 3, 3, 4, 5, 6, 7, 9000, 1234}));
-    ASSERT_EQ(array.size(), 12);
+    ASSERT_EQ(array, Array<int>({100, -11, 0, 1, 2, 789, 3, 4, 5, 6, 7, 9000, 1234}));
+    ASSERT_EQ(array.size(), 13);
 
     try {
         array.insert(42, 666);
@@ -112,6 +114,7 @@ TEST(ArrayTest, InsertTest)
     } catch (std::out_of_range& exception) {
         ASSERT_EQ(exception.what(), std::string("CppADS::Array<T>::insert: iterator is invalid"));
     }
+
 }
 
 TEST(ArrayTest, RemoveTest)
