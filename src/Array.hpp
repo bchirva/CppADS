@@ -42,24 +42,32 @@ namespace CppADS
         /// @return element's count
         size_t size() const override;
 
-        /// @brief Insert value container
+        /// @brief Insert value to container
         /// @param value inserted value
         /// @param index position to insert
         void insert(const T& value, size_t index);
 
-        /// @brief Overloaded method
-
+        /// @brief Insert value to container
+        /// @param value inserted value
+        /// @param index position to insert
         void insert(T&& value, size_t index);
 
+        /// @brief Insert value to container
+        /// @param value inserted value
+        /// @param iterator position to insert
         void insert(const T& value, iterator position);
 
+        /// @brief Insert value to container
+        /// @param value inserted value
+        /// @param iterator position to insert
         void insert(T&& value, iterator position);
 
         /// @brief Remove values from container
-        /// @param index position of first item to delete
-        /// @param count count of deleted elements
+        /// @param iterator position of item to delete
         void remove(size_t index);
 
+        /// @brief Remove values from container
+        /// @param iterator position of item to delete
         void remove(iterator position);
 
         /// @brief Access to item
@@ -67,10 +75,19 @@ namespace CppADS
         /// @return reference to value
         T& operator[](size_t index);
 
-        /// @brief Const overloaded method
+        /// @brief Access to item
+        /// @param index item position
+        /// @return reference to value
         const T& operator[](size_t index) const;
 
+        /// @brief Search for first item equal value
+        /// @param value value search for
+        /// @return iterator to found item (end if item not found)
         iterator find(const T& value);
+
+        /// @brief Search for first item equal value
+        /// @param value value search for
+        /// @return iterator to found item (end if item not found)
         const_iterator find(const T& value) const;
 
         iterator begin() {
@@ -322,18 +339,24 @@ void CppADS::Array<T>::insert(const T& value, size_t index)
         throw std::out_of_range("CppADS::Array<T>::insert: index is out of range");
 
     std::unique_ptr<T[]> tmp = std::make_unique<T[]>(m_size + 1);
-    auto tmp_it = tmp.get();
-    auto insert_it = begin() + index;
+    auto tmp_it     = tmp.get();
+    auto tmp_end    = tmp.get() + m_size + 1;
+    auto insert_it  = begin() + index;
+    auto data_it    = begin();
 
-    for(auto data_it = begin(); data_it != end(); ++data_it)
+    while (tmp_it != tmp_end)
     {
-        if (insert_it == data_it)
+        if (data_it == insert_it)
         {
             *tmp_it = value;
             tmp_it++;
+            insert_it = nullptr;
+            continue;
         }
+
         *tmp_it = std::move(*data_it);
         tmp_it++;
+        data_it++;
     }
 
     m_data = std::move(tmp);
@@ -347,17 +370,25 @@ void CppADS::Array<T>::insert(T&& value, size_t index)
         throw std::out_of_range("CppADS::Array<T>::insert: index is out of range");
 
     std::unique_ptr<T[]> tmp = std::make_unique<T[]>(m_size + 1);
-    auto tmp_it = tmp.get();
-    auto insert_it = begin() + index;
 
-    for(auto it = begin(); it != end(); ++it, ++tmp_it)
+    auto tmp_it     = tmp.get();
+    auto tmp_end    = tmp.get() + m_size + 1;
+    auto insert_it  = begin() + index;
+    auto data_it    = begin();
+
+    while (tmp_it != tmp_end)
     {
-        if (insert_it == it)
+        if (data_it == insert_it)
         {
             *tmp_it = std::move(value);
             tmp_it++;
+            insert_it = nullptr;
+            continue;
         }
-        *tmp_it = std::move(*it);
+
+        *tmp_it = std::move(*data_it);
+        tmp_it++;
+        data_it++;
     }
 
     m_data = std::move(tmp);
@@ -371,16 +402,24 @@ void CppADS::Array<T>::insert(const T& value, iterator position)
          throw std::out_of_range("CppADS::Array<T>::insert: iterator is invalid");
 
     std::unique_ptr<T[]> tmp = std::make_unique<T[]>(m_size + 1);
-    auto tmp_it = tmp.get();
 
-    for(auto it = begin(); it != end(); ++it, ++tmp_it)
+    auto tmp_it     = tmp.get();
+    auto tmp_end    = tmp.get() + m_size + 1;
+    auto data_it    = begin();
+
+    while (tmp_it != tmp_end)
     {
-        if (position == it)
+        if (data_it == position)
         {
             *tmp_it = value;
             tmp_it++;
+            position = nullptr;
+            continue;
         }
-        *tmp_it = std::move(*it);
+
+        *tmp_it = std::move(*data_it);
+        tmp_it++;
+        data_it++;
     }
 
     m_data = std::move(tmp);
@@ -394,16 +433,24 @@ void CppADS::Array<T>::insert(T&& value, iterator position)
          throw std::out_of_range("CppADS::Array<T>::insert: iterator is invalid");
 
     std::unique_ptr<T[]> tmp = std::make_unique<T[]>(m_size + 1);
-    auto tmp_it = tmp.get();
 
-    for(auto it = begin(); it != end(); ++it, ++tmp_it)
+    auto tmp_it     = tmp.get();
+    auto tmp_end    = tmp.get() + m_size + 1;
+    auto data_it    = begin();
+
+    while (tmp_it != tmp_end)
     {
-        if (position == it)
+        if (data_it == position)
         {
             *tmp_it = std::move(value);
             tmp_it++;
+            position = nullptr;
+            continue;
         }
-        *tmp_it = std::move(*it);
+
+        *tmp_it = std::move(*data_it);
+        tmp_it++;
+        data_it++;
     }
 
     m_data = std::move(tmp);
