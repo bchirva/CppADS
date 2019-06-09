@@ -12,6 +12,12 @@ namespace CppADS
     class Deque : public IContainer
     {
     public:
+        using value_type = T;
+        using reference = T&;
+        using const_reference = const T&;
+        using pointer = T*;
+        using const_pointer = const T*;
+
         Deque() = default;                          ///< Default constructor
         Deque(const Deque<T>& copy);                ///< Copy constructor
         Deque(Deque<T>&& move);                     ///< Move constructor
@@ -24,7 +30,7 @@ namespace CppADS
 
         /// @brief Remove all data from container
         void clear() override;
-        
+
         /// @brief Get size of container
         /// @return element's count
         size_t size() const override;
@@ -32,37 +38,37 @@ namespace CppADS
         /// @brief Insert element to the end
         /// @param value inserted item
         void push_back(const T& value);
-        
+
         /// @brief Overloaded method
         void push_back(T&& value);
-        
+
         /// @brief Insert element to the beginning
         /// @param value
         void push_front(const T& value);
-        
+
         /// @brief Overloaded method
         void push_front(T&& value);
 
         /// @brief Remove last element
         void pop_back();
-        
+
         /// @brief Remove first element
         void pop_front();
 
         /// @brief Access to the first element
-        /// @return Reference to the first element 
+        /// @return Reference to the first element
         T& front();
-        
+
         /// @brief Access to the first element
-        /// @return Reference to the first element 
+        /// @return Reference to the first element
         const T& front() const;
 
         /// @brief Access to the last element
-        /// @return Reference to the last element 
+        /// @return Reference to the last element
         T& back();
-        
+
         /// @brief Access to the last element
-        /// @return Reference to the last element 
+        /// @return Reference to the last element
         const T& back() const;
 
     private:
@@ -207,7 +213,7 @@ void CppADS::Deque<T>::pop_back()
         m_back = m_back->Prev;
         if (m_back == nullptr)
         {
-            m_front = nullptr;        
+            m_front = nullptr;
         }
         else
         {
@@ -225,7 +231,7 @@ void CppADS::Deque<T>::pop_front()
         m_front = m_front->Next;
         if (m_front == nullptr)
         {
-            m_back = nullptr;        
+            m_back = nullptr;
         }
         else
         {
@@ -300,4 +306,4 @@ void CppADS::Deque<T>::clear()
         pop_front();
 }
 
-#endif
+#endif //DEQUE_HPP

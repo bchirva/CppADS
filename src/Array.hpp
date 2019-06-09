@@ -1,4 +1,5 @@
-#pragma once
+#ifndef ARRAY_H
+#define ARRAY_H
 
 #include "Container.hpp"
 
@@ -28,12 +29,14 @@ namespace CppADS
         using const_reverse_iterator = std::reverse_iterator<const_iterator>;
 
         Array() = default;                          ///< Default constructor
-        ~Array() = default;                         ///< Destructor
         Array(const Array<T>& copy);                ///< Copy contructor
         Array(Array<T>&& move);                     ///< Move contructor
+        Array(std::initializer_list<T> init_list);  ///< Contructor from initializer list
+
         Array<T>& operator=(const Array<T>& copy);  ///< Copy assignment operator
         Array<T>& operator=(Array<T>&& move);       ///< Move assignment operator
-        Array(std::initializer_list<T> init_list);  ///< Contructor from initializer list
+
+        ~Array() = default;                         ///< Destructor
 
         /// @brief Remove all data from container
         void clear() override;
@@ -565,3 +568,5 @@ bool CppADS::Array<T>::operator!=(const Array<T>& rhs) const
 {
     return !(*this == rhs);
 }
+
+#endif //ARRAY_H
