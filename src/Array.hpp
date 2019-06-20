@@ -2,7 +2,9 @@
 
 #include "Container.hpp"
 
+#include <cmath>
 #include <memory>
+#include <functional>
 
 namespace CppADS
 {
@@ -25,6 +27,10 @@ namespace CppADS
         /// @brief Get size of container
         /// @return element's count
         size_t size() const override;
+
+        /// @brief Get reserved size for container's data
+        /// @return Current array's capacity
+        size_t capacity() const;
         
         /// @brief Insert value container
         /// @param value inserted value
@@ -46,10 +52,16 @@ namespace CppADS
         
         /// @brief Const overloaded method
         const T& operator[](size_t index) const;
+
+        void setReserveFunc(std::function<size_t(size_t)>&& func);
         
     private:
         std::unique_ptr<T[]> m_data { nullptr };      ///< Pointer to the data head on heap
-        size_t m_size { 0 };                          ///< Array size        
+        size_t m_size { 0 };                          ///< Array actual size
+        size_t m_capacity { 0 };                      ///< Reserved size
+        std::function<size_t(size_t)> m_reserve_func = [](size_t _size) -> size_t {
+            return std::ceil(std::log2(_size));
+        };
     };
 }
 
@@ -57,6 +69,7 @@ template<typename T>
 CppADS::Array<T>::Array(const Array<T>& copy)
 {
     m_size = copy.m_size;
+    m_capacity = copy.m_capacity;
     m_data.reset(new T[m_size]);
     for (int i = 0; i < m_size; i++)
     {
@@ -68,15 +81,18 @@ template<typename T>
 CppADS::Array<T>::Array(Array<T>&& move)
 {
     m_size = std::move(move.m_size);
+    m_capacity = std::move(move.m_capacity);
     m_data = std::move(move.m_data);
     move.m_size = 0;
+    move.m_capacity = 0;
 }
 
 template<typename T> 
 CppADS::Array<T>::Array(std::initializer_list<T> init_list)
 {
     m_size = init_list.size();
-    m_data.reset(new T[m_size]);
+    m_capacity = m_reserve_func(m_size);
+    m_data.reset(new T[m_capacity]);
     int i = 0;
     for(auto it = init_list.begin(); it != init_list.end(); it++)
     {
@@ -89,7 +105,8 @@ template<typename T>
 CppADS::Array<T>& CppADS::Array<T>::operator=(const Array<T>& copy)
 {
     m_size = copy.m_size;
-    m_data.reset(new T[m_size]);
+    m_capacity = copy.m_capacity;
+    m_data.reset(new T[m_capacity]);
     for (int i = 0; i < m_size; i++)
     {
         m_data[i] = copy.m_data[i];
@@ -101,8 +118,10 @@ template<typename T>
 CppADS::Array<T>& CppADS::Array<T>::operator=(Array<T>&& move)
 {
     m_size = std::move(move.m_size);
+    m_capacity = std::move(move.m_capacity);
     m_data = std::move(move.m_data);
     move.m_size = 0;
+    move.m_capacity = 0;
     return *this;
 }
 
@@ -112,12 +131,19 @@ void CppADS::Array<T>::clear()
 {
     m_data.reset(nullptr);
     m_size = 0;
+    m_capacity = 0;
 }
 
 template<typename T> 
 size_t CppADS::Array<T>::size() const
 {
     return m_size;
+}
+
+template<typename T>
+size_t CppADS::Array<T>::capacity() const
+{
+    return m_capacity;
 }
 
 template<typename T> 
@@ -127,7 +153,10 @@ void CppADS::Array<T>::insert(const T& value, size_t index)
         throw std::out_of_range("CppADS::Array<T>::insert: index out of range");
 
     m_size++;
-    std::unique_ptr<T[]> tmp = std::make_unique<T[]>(m_size);
+    if (m_capacity < m_size)
+        m_capacity = m_reserve_func(m_size);
+
+    std::unique_ptr<T[]> tmp = std::make_unique<T[]>(m_capacity);
     for (int i = 0; i < index; i++)
         tmp[i] = m_data[i];
 
@@ -146,7 +175,10 @@ void CppADS::Array<T>::insert(T&& value, size_t index)
         throw std::out_of_range("CppADS::Array<T>::insert: index is out of range");
 
     m_size++;
-    std::unique_ptr<T[]> tmp = std::make_unique<T[]>(m_size);
+    if (m_capacity < m_size)
+        m_capacity = m_reserve_func(m_size);
+
+    std::unique_ptr<T[]> tmp = std::make_unique<T[]>(m_capacity);
     for (int i = 0; i < index; i++)
         tmp[i] = m_data[i];
 
@@ -167,7 +199,7 @@ void CppADS::Array<T>::remove(size_t index, uint32_t count)
         throw std::out_of_range("CppADS::Array<T>::remove: count is out of range");
 
     m_size -= count;
-    std::unique_ptr<T[]> tmp = std::make_unique<T[]>(m_size);
+    std::unique_ptr<T[]> tmp = std::make_unique<T[]>(m_capacity);
 
     for (int i = 0; i < index; i++)
         tmp[i] = m_data[i];
@@ -191,5 +223,11 @@ const T& CppADS::Array<T>::operator[](size_t index) const
     if (index >= m_size)
         throw std::out_of_range("CppADS::Array<T>::operator[]: index is out of range");
     return m_data[index];
+}
+
+template<typename T>
+void CppADS::Array<T>::setReserveFunc(std::function<size_t(size_t)>&& func)
+{
+    m_reserve_func = std::move(func);
 }
 
