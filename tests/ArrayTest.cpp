@@ -1,10 +1,9 @@
 #include <gtest/gtest.h>
-#include <iostream>
 
 #include "Array.hpp"
 using CppADS::Array;
 
-TEST(ArrayTest, ConstructArrayTest)
+TEST(ArrayTest, ConstructTest)
 {
     Array<int> array_empty;
     ASSERT_EQ(array_empty.size(), 0);
@@ -26,7 +25,7 @@ TEST(ArrayTest, ConstructArrayTest)
     ASSERT_EQ(array_init.size(), 0);
 }
 
-TEST(ArrayTest, IteratorsArrayTest)
+TEST(ArrayTest, IteratorsTest)
 {
     Array<int> array_init {0,1,2,3,4,5,6,7,8,9};
 
@@ -46,7 +45,7 @@ TEST(ArrayTest, IteratorsArrayTest)
     }
 }
 
-TEST(ArrayTest, FindArrayTest)
+TEST(ArrayTest, FindTest)
 {
     Array<int> array {0,11,22,33,44,55,66,77,88,99};
     auto item = array.find(22);
@@ -56,7 +55,7 @@ TEST(ArrayTest, FindArrayTest)
     ASSERT_EQ(item, array.begin() + 2);
 }
 
-TEST(ArrayTest, AssignArrayTest)
+TEST(ArrayTest, AssignTest)
 {
     std::initializer_list<int> init_list { 0, 1, 2, 3, 4, 5, 6, 7, 8, 9 };
     Array<int> array_init (init_list);
@@ -142,6 +141,19 @@ TEST(ArrayTest, RemoveTest)
         array.remove(array.begin() - 99);
     } catch (std::out_of_range& exception) {
         ASSERT_EQ(exception.what(), std::string("CppADS::Array<T>::remove: iterator is invalid"));
+    }
+}
+
+TEST(ArrayTest, CapacityTest)
+{
+    Array<int> array;
+    ASSERT_EQ(array.capacity(), 0);
+
+    for (int i = 0; i < 128; i++)
+    {
+        array.insert(i, array.end());
+        size_t expected_capacity = std::pow(2, std::ceil(std::log2(array.size())));
+        ASSERT_EQ(array.capacity(), expected_capacity);
     }
 }
 

@@ -7,7 +7,6 @@
 #include <memory>
 #include <functional>
 #include <iterator>
-#include <iostream>
 
 namespace CppADS
 {
@@ -148,9 +147,16 @@ namespace CppADS
         size_t m_size { 0 };                          ///< Array actual size
         size_t m_capacity { 0 };                      ///< Reserved size
 
+        /// @brief Allocation size calculation function
+        /// @param _size for which you need to reserve a space
+        /// @return space to resererve
         std::function<size_t(size_t)> m_reserve_func = [](size_t _size) -> size_t {
-            int current_power = std::ceil(std::log2(_size));
-            return std::pow(2, current_power + 1);
+            if (_size > 0)
+            {
+                int current_power = std::ceil(std::log2(_size));
+                return std::pow(2, current_power);
+            }
+            else return 1;
         };
     };
 
@@ -190,13 +196,15 @@ namespace CppADS
             m_ptr--;;
             return *this;
         }
-        Iterator& operator+(int AOffset){
-            m_ptr += AOffset;
-            return *this;
+        Iterator operator+(int AOffset){
+            Iterator result(m_ptr);
+            result.m_ptr += AOffset;
+            return result;
         }
-        Iterator& operator-(int AOffset){
-            m_ptr -= AOffset;
-            return *this;
+        Iterator operator-(int AOffset){
+            Iterator result(m_ptr);
+            result.m_ptr -= AOffset;
+            return result;
         }
 
         bool operator==(const Iterator& rhs) const {
@@ -255,13 +263,15 @@ namespace CppADS
             m_ptr--;;
             return *this;
         }
-        ConstIterator& operator+(int AOffset){
-            m_ptr += AOffset;
-            return *this;
+        ConstIterator operator+(int AOffset){
+            ConstIterator result(m_ptr);
+            result.m_ptr += AOffset;
+            return result;
         }
-        ConstIterator& operator-(int AOffset){
-            m_ptr -= AOffset;
-            return *this;
+        ConstIterator operator-(int AOffset){
+            ConstIterator result(m_ptr);
+            result.m_ptr -= AOffset;
+            return result;
         }
 
         bool operator==(const ConstIterator& rhs) const {
@@ -372,7 +382,7 @@ void CppADS::Array<T>::insert(const T& value, size_t index)
         throw std::out_of_range("CppADS::Array<T>::insert: index is out of range");
 
     if (m_capacity == m_size)
-        m_capacity = m_reserve_func(m_size);
+        m_capacity = m_reserve_func(m_size + 1);
 
     std::unique_ptr<T[]> tmp = std::make_unique<T[]>(m_capacity);
     auto tmp_it     = tmp.get();
@@ -406,7 +416,7 @@ void CppADS::Array<T>::insert(T&& value, size_t index)
         throw std::out_of_range("CppADS::Array<T>::insert: index is out of range");
 
     if (m_capacity == m_size)
-        m_capacity = m_reserve_func(m_size);
+        m_capacity = m_reserve_func(m_size + 1);
 
     std::unique_ptr<T[]> tmp = std::make_unique<T[]>(m_capacity);
 
@@ -441,9 +451,9 @@ void CppADS::Array<T>::insert(const T& value, iterator position)
          throw std::out_of_range("CppADS::Array<T>::insert: iterator is invalid");
 
      if (m_capacity == m_size)
-         m_capacity = m_reserve_func(m_size);
+         m_capacity = m_reserve_func(m_size + 1);
 
-     std::unique_ptr<T[]> tmp = std::make_unique<T[]>(m_capacity);
+    std::unique_ptr<T[]> tmp = std::make_unique<T[]>(m_capacity);
 
     auto tmp_it     = tmp.get();
     auto tmp_end    = tmp.get() + m_size + 1;
@@ -475,7 +485,7 @@ void CppADS::Array<T>::insert(T&& value, iterator position)
          throw std::out_of_range("CppADS::Array<T>::insert: iterator is invalid");
 
      if (m_capacity == m_size)
-         m_capacity = m_reserve_func(m_size);
+         m_capacity = m_reserve_func(m_size + 1);
 
      std::unique_ptr<T[]> tmp = std::make_unique<T[]>(m_capacity);
 
