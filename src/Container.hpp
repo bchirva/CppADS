@@ -1,4 +1,5 @@
-#pragma once
+#ifndef CONTAINER_H
+#define CONTAINER_H
 
 #include <stddef.h>
 
@@ -12,8 +13,10 @@ namespace CppADS
         /// @brief Remove all data from container
         virtual void clear() = 0;
 
-        /// @brief Get size of container 
-        /// @return Count of items 
+        /// @brief Get size of container
+        /// @return Count of items
         virtual size_t size() const = 0;
     };
 }
+
+#endif //CONTAINER_H

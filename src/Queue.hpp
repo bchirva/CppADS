@@ -12,6 +12,12 @@ namespace CppADS
     class Queue : public IContainer
     {
     public:
+        using value_type = T;
+        using reference = T&;
+        using const_reference = const T&;
+        using pointer = T*;
+        using const_pointer = const T*;
+
         Queue() = default;                              ///< Defualt constructor
         Queue(const Queue<T>& copy);                    ///< Copy contructor
         Queue(Queue<T>&& move);                         ///< Move constructor
@@ -39,7 +45,7 @@ namespace CppADS
         /// @brief Remove front element
         void dequeue();
 
-        /// @brief Get first inserted value 
+        /// @brief Get first inserted value
         /// @return value on front of the queue
         T& front();
 
@@ -129,7 +135,7 @@ CppADS::Queue<T>& CppADS::Queue<T>::operator=(Queue<T>&& move)
     m_tail = std::move(move.m_tail);
     m_head = std::move(move.m_head);
     move.m_size = 0;
-    
+
     return *this;
 }
 
@@ -209,4 +215,4 @@ const T& CppADS::Queue<T>::front() const
         throw std::out_of_range("CppADS::Queue<T>::front: queue is empty");
 }
 
-#endif
+#endif //QUEUE_HPP

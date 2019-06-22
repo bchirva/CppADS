@@ -1,4 +1,5 @@
-#pragma once
+#ifndef STACK_H
+#define STACK_H
 
 #include "Container.hpp"
 
@@ -11,13 +12,21 @@ namespace CppADS
     class Stack : public IContainer
     {
     public:
+        using value_type = T;
+        using reference = T&;
+        using const_reference = const T&;
+        using pointer = T*;
+        using const_pointer = const T*;
+
         Stack() = default;                          ///< Default constructor
-        ~Stack() = default;                         ///< Destructor
         Stack(const Stack<T>& copy);                ///< Copy contructor
         Stack(Stack<T>&& move);                     ///< Move contructor
+        Stack(std::initializer_list<T> init_list);  ///< Contructor from initializer list
+
         Stack<T>& operator=(const Stack<T>& copy);  ///< Copy assignment operator
         Stack<T>& operator=(Stack<T>&& move);       ///< Move assignment operator
-        Stack(std::initializer_list<T> init_list);  ///< Contructor from initializer list
+
+        ~Stack() = default;                         ///< Destructor
 
         /// @brief Remove all data from container
         void clear() override;
@@ -40,7 +49,7 @@ namespace CppADS
         /// @brief Overloaded method
         const T& top() const;
 
-        /// @brief Remove top item 
+        /// @brief Remove top item
         void  pop();
 
     private:
@@ -61,8 +70,8 @@ namespace CppADS
 template<class T>
 CppADS::Stack<T>::Stack(const Stack<T>& copy)
 {
-    m_size = copy.m_size; 
-    
+    m_size = copy.m_size;
+
     std::unique_ptr<Node>* self_node = &m_head;
     const std::unique_ptr<Node>* copy_node = &(copy.m_head);
 
@@ -181,5 +190,4 @@ void CppADS::Stack<T>::pop()
     m_size--;
     m_head = std::move(m_head->Next);
 }
-
-
+#endif //STACK_H
