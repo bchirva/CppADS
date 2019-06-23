@@ -15,17 +15,14 @@ namespace CppADS
     class Array : public IContainer
     {
     public:
-        class Iterator;
-        class ConstIterator;
-
         using value_type = T;
         using reference = T&;
         using const_reference = const T&;
         using pointer = T*;
         using const_pointer = const T*;
 
-        using iterator = Iterator;
-        using const_iterator = ConstIterator;
+        class iterator;
+        class const_iterator;
         using reverse_iterator = std::reverse_iterator<iterator>;
         using const_reverse_iterator = std::reverse_iterator<const_iterator>;
 
@@ -103,46 +100,46 @@ namespace CppADS
         const_iterator find(const T& value) const;
 
         iterator begin() {
-            return Iterator(m_data.get());
+            return iterator(m_data.get());
         };
         const_iterator begin() const {
-            return ConstIterator(m_data.get());
+            return const_iterator(m_data.get());
         };
         const_iterator cbegin() const {
-            return ConstIterator(m_data.get());
+            return const_iterator(m_data.get());
         };
         iterator end() {
-            return Iterator(m_data.get() + m_size);
+            return iterator(m_data.get() + m_size);
         };
         const_iterator end() const {
-            return ConstIterator(m_data.get() + m_size);
+            return const_iterator(m_data.get() + m_size);
         };
         const_iterator cend() const {
-            return ConstIterator(m_data.get() + m_size);
+            return const_iterator(m_data.get() + m_size);
         };
         reverse_iterator rbegin() {
-            return std::reverse_iterator<Iterator>(m_data.get() + m_size);
+            return std::reverse_iterator<iterator>(m_data.get() + m_size);
         };
         const_reverse_iterator rbegin() const {
-            return std::reverse_iterator<ConstIterator>(m_data.get() + m_size);
+            return std::reverse_iterator<const_iterator>(m_data.get() + m_size);
         };
         const_reverse_iterator crbegin() const {
-            return std::reverse_iterator<ConstIterator>(m_data.get() + m_size);
+            return std::reverse_iterator<const_iterator>(m_data.get() + m_size);
         };
         reverse_iterator rend() {
-            return std::reverse_iterator<Iterator>(m_data.get());
+            return std::reverse_iterator<iterator>(m_data.get());
         };
         const_reverse_iterator rend() const {
-            return std::reverse_iterator<ConstIterator>(m_data.get());
+            return std::reverse_iterator<const_iterator>(m_data.get());
         };
         const_reverse_iterator crend() const {
-            return std::reverse_iterator<ConstIterator>(m_data.get());
+            return std::reverse_iterator<const_iterator>(m_data.get());
         };
 
         bool operator==(const Array<T>& rhs) const;
         bool operator!=(const Array<T>& rhs) const;
 
-    private:
+    protected:
         std::unique_ptr<T[]> m_data { nullptr };      ///< Pointer to the data head on heap
         size_t m_size { 0 };                          ///< Array actual size
         size_t m_capacity { 0 };                      ///< Reserved size
@@ -161,14 +158,14 @@ namespace CppADS
     };
 
     template<typename T>
-    class Array<T>::Iterator : public std::iterator<std::random_access_iterator_tag, T>
+    class Array<T>::iterator : public std::iterator<std::random_access_iterator_tag, T>
     {
     private:
         T* m_ptr { nullptr };
 
     public:
-        Iterator(T* src_ptr) : m_ptr(src_ptr) {}
-        ~Iterator() {m_ptr = nullptr;}
+        iterator(T* src_ptr = nullptr) : m_ptr(src_ptr) {}
+        ~iterator() {m_ptr = nullptr;}
 
         Array<T>::reference operator*() {
             return *m_ptr;
@@ -180,62 +177,62 @@ namespace CppADS
             return m_ptr[AIndex];
         }
 
-        Iterator& operator++() {
+        iterator& operator++() {
             m_ptr++;
             return *this;
         }
-        Iterator& operator--() {
+        iterator& operator--() {
             m_ptr--;;
             return *this;
         }
-        Iterator& operator++(int) {
+        iterator& operator++(int) {
             m_ptr++;
             return *this;
         }
-        Iterator& operator--(int) {
+        iterator& operator--(int) {
             m_ptr--;;
             return *this;
         }
-        Iterator operator+(int AOffset){
-            Iterator result(m_ptr);
+        iterator operator+(int AOffset){
+            iterator result(m_ptr);
             result.m_ptr += AOffset;
             return result;
         }
-        Iterator operator-(int AOffset){
-            Iterator result(m_ptr);
+        iterator operator-(int AOffset){
+            iterator result(m_ptr);
             result.m_ptr -= AOffset;
             return result;
         }
 
-        bool operator==(const Iterator& rhs) const {
+        bool operator==(const iterator& rhs) const {
             return m_ptr == rhs.m_ptr;
         }
-        bool operator!=(const Iterator& rhs) const {
+        bool operator!=(const iterator& rhs) const {
             return m_ptr != rhs.m_ptr;
         }
-        bool operator>(const Iterator& rhs) const {
+        bool operator>(const iterator& rhs) const {
             return m_ptr > rhs.m_ptr;
         }
-        bool operator<(const Iterator& rhs) const {
+        bool operator<(const iterator& rhs) const {
             return m_ptr < rhs.m_ptr;
         }
-        bool operator>=(const Iterator& rhs) const {
+        bool operator>=(const iterator& rhs) const {
             return m_ptr >= rhs.m_ptr;
         }
-        bool operator<=(const Iterator& rhs) const {
+        bool operator<=(const iterator& rhs) const {
             return m_ptr <= rhs.m_ptr;
         }
     };
 
     template<typename T>
-    class Array<T>::ConstIterator : public std::iterator<std::random_access_iterator_tag, T>
+    class Array<T>::const_iterator : public std::iterator<std::random_access_iterator_tag, T>
     {
     private:
         T* m_ptr { nullptr };
 
     public:
-        ConstIterator(T* src_ptr) : m_ptr(src_ptr) {}
-        ~ConstIterator() {m_ptr = nullptr;}
+        const_iterator(T* src_ptr = nullptr) : m_ptr(src_ptr) {}
+        ~const_iterator() {m_ptr = nullptr;}
 
         Array<T>::const_reference operator*() {
             return *m_ptr;
@@ -247,49 +244,49 @@ namespace CppADS
             return m_ptr[AIndex];
         }
 
-        ConstIterator& operator++() {
+        const_iterator& operator++() {
             m_ptr++;
             return *this;
         }
-        ConstIterator& operator--() {
+        const_iterator& operator--() {
             m_ptr--;;
             return *this;
         }
-        ConstIterator& operator++(int) {
+        const_iterator& operator++(int) {
             m_ptr++;
             return *this;
         }
-        ConstIterator& operator--(int) {
+        const_iterator& operator--(int) {
             m_ptr--;;
             return *this;
         }
-        ConstIterator operator+(int AOffset){
-            ConstIterator result(m_ptr);
+        const_iterator operator+(int AOffset){
+            const_iterator result(m_ptr);
             result.m_ptr += AOffset;
             return result;
         }
-        ConstIterator operator-(int AOffset){
-            ConstIterator result(m_ptr);
+        const_iterator operator-(int AOffset){
+            const_iterator result(m_ptr);
             result.m_ptr -= AOffset;
             return result;
         }
 
-        bool operator==(const ConstIterator& rhs) const {
+        bool operator==(const const_iterator& rhs) const {
             return m_ptr == rhs.m_ptr;
         }
-        bool operator!=(const ConstIterator& rhs) const {
+        bool operator!=(const const_iterator& rhs) const {
             return m_ptr != rhs.m_ptr;
         }
-        bool operator>(const ConstIterator& rhs) const {
+        bool operator>(const const_iterator& rhs) const {
             return m_ptr > rhs.m_ptr;
         }
-        bool operator<(const ConstIterator& rhs) const {
+        bool operator<(const const_iterator& rhs) const {
             return m_ptr < rhs.m_ptr;
         }
-        bool operator>=(const ConstIterator& rhs) const {
+        bool operator>=(const const_iterator& rhs) const {
             return m_ptr >= rhs.m_ptr;
         }
-        bool operator<=(const ConstIterator& rhs) const {
+        bool operator<=(const const_iterator& rhs) const {
             return m_ptr <= rhs.m_ptr;
         }
     };
