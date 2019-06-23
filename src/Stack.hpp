@@ -2,6 +2,7 @@
 #define STACK_H
 
 #include "Container.hpp"
+#include "Array.hpp"
 
 #include <memory>
 
@@ -9,7 +10,7 @@ namespace CppADS
 {
     template<class T>
     /// @brief Stack (LIFO) class
-    class Stack : public IContainer
+    class Stack : private Array<T>
     {
     public:
         using value_type = T;
@@ -17,6 +18,9 @@ namespace CppADS
         using const_reference = const T&;
         using pointer = T*;
         using const_pointer = const T*;
+
+        class iterator;
+        class const_iterator;
 
         Stack() = default;                          ///< Default constructor
         Stack(const Stack<T>& copy);                ///< Copy contructor
@@ -50,144 +54,181 @@ namespace CppADS
         const T& top() const;
 
         /// @brief Remove top item
-        void  pop();
+        void pop();
 
+        iterator begin() {
+            return iterator(Array<T>::rbegin());
+        }
+        const_iterator begin() const {
+            return const_iterator(Array<T>::rbegin());
+        }
+        const_iterator cbegin() const {
+            return const_iterator(Array<T>::crbegin());
+        }
+        iterator end() {
+            return iterator(Array<T>::rend());
+        }
+        const_iterator end() const {
+            return const_iterator(Array<T>::rend());
+        }
+        const_iterator cend() const {
+            return const_iterator(Array<T>::crend());
+        }
+    };
+
+    template<typename T>
+    class Stack<T>::iterator : public std::iterator<std::forward_iterator_tag, T>
+    {
     private:
+        typename Array<T>::reverse_iterator it { nullptr };
 
-        struct Node
-        {
-            T Value;
-            std::unique_ptr<Node> Next { nullptr };
-            Node(T _value, std::unique_ptr<Node>&& _next = nullptr)
-                : Value(_value), Next(std::move(_next)) {}
-        };
+    public:
+        iterator(typename Array<T>::reverse_iterator src_it = nullptr) : it(src_it) {}
+        ~iterator() = default;
 
-        std::unique_ptr<Node> m_head { nullptr };   ///< Pointer to the top of the stack
-        size_t m_size { 0 };                        ///< Stack size
+        Stack<T>::reference operator*() {
+            return *it;
+        }
+        Stack<T>::pointer operator->() {
+            return it.operator->();
+        }
+
+        iterator& operator++() {
+            it++;
+            return *this;
+        }
+        iterator& operator--() {
+            it--;;
+            return *this;
+        }
+        iterator& operator++(int) {
+            it++;
+            return *this;
+        }
+        iterator& operator--(int) {
+            it--;;
+            return *this;
+        }
+
+        bool operator==(const iterator& rhs) const {
+            return it == rhs.it;
+        }
+        bool operator!=(const iterator& rhs) const {
+            return it != rhs.it;
+        }
+    };
+
+    template<typename T>
+    class Stack<T>::const_iterator : public std::iterator<std::forward_iterator_tag, T>
+    {
+    private:
+        typename Array<T>::reverse_iterator it;
+
+    public:
+        const_iterator(typename Array<T>::reverse_iterator src_it = nullptr) : it(src_it) {}
+        ~const_iterator() = default;
+
+        Stack<T>::const_reference operator*() {
+            return *it;
+        }
+        Stack<T>::const_pointer operator->() {
+            return it.operator->();
+        }
+
+        const_iterator& operator++() {
+            it++;
+            return *this;
+        }
+        const_iterator& operator--() {
+            it--;;
+            return *this;
+        }
+        const_iterator& operator++(int) {
+            it++;
+            return *this;
+        }
+        const_iterator& operator--(int) {
+            it--;;
+            return *this;
+        }
+
+        bool operator==(const const_iterator& rhs) const {
+            return it == rhs.it;
+        }
+        bool operator!=(const const_iterator& rhs) const {
+            return it != rhs.it;
+        }
     };
 }
 
 template<class T>
 CppADS::Stack<T>::Stack(const Stack<T>& copy)
-{
-    m_size = copy.m_size;
-
-    std::unique_ptr<Node>* self_node = &m_head;
-    const std::unique_ptr<Node>* copy_node = &(copy.m_head);
-
-    while ((*copy_node) != nullptr)
-    {
-        *self_node = std::make_unique<Node>(copy_node->get()->Value);
-
-        self_node = &(self_node->get()->Next);
-        copy_node = &(copy_node->get()->Next);
-    }
-}
+    : Array<T>(copy)
+{}
 
 template<class T>
 CppADS::Stack<T>::Stack(Stack<T>&& move)
-{
-    m_head = std::move(move.m_head);
-    m_size = std::move(move.m_size);
-    move.m_size = 0;
-}
+    : Array<T>(move)
+{}
+
+template<class T>
+CppADS::Stack<T>::Stack(std::initializer_list<T> init_list)
+    : Array<T>(init_list)
+{}
 
 template<class T>
 CppADS::Stack<T>& CppADS::Stack<T>::operator=(const Stack<T>& copy)
 {
-    m_head.reset(nullptr);
-    m_size = copy.m_size;
-
-    std::unique_ptr<Node>* self_node = &m_head;
-    const std::unique_ptr<Node>* copy_node = &(copy.m_head);
-
-    while ((*copy_node) != nullptr)
-    {
-        *self_node = std::make_unique<Node>(copy_node->get()->Value);
-
-        self_node = &(self_node->get()->Next);
-        copy_node = &(copy_node->get()->Next);
-    }
+    Array<T>::operator=(copy);
     return *this;
 }
 
 template<class T>
 CppADS::Stack<T>& CppADS::Stack<T>::operator=(Stack<T>&& move)
 {
-    m_head = std::move(move.m_head);
-    m_size = std::move(move.m_size);
-    move.m_size = 0;
+    Array<T>::operator=(move);
     return *this;
-}
-
-template<class T>
-CppADS::Stack<T>::Stack(std::initializer_list<T> init_list)
-{
-    for (auto it = init_list.begin(); it != init_list.end(); it++)
-    {
-        push(*it);
-    }
 }
 
 template<class T>
 void CppADS::Stack<T>::clear()
 {
-    m_head.reset(nullptr);
-    m_size = 0;
+    Array<T>::clear();
 }
 
 template<class T>
 size_t CppADS::Stack<T>::size() const
 {
-    return m_size;
+    return Array<T>::size();
 }
 
 template<class T>
 void CppADS::Stack<T>::push(const T& value)
 {
-    m_size++;
-    std::unique_ptr<Node> new_top = std::make_unique<Node>(value, std::move(m_head));
-    m_head = std::move(new_top);
+    Array<T>::insert(value, Array<T>::end());
 }
 
 template<class T>
 void CppADS::Stack<T>::push(T&& value)
 {
-    m_size++;
-    std::unique_ptr<Node> new_top = std::make_unique<Node>(std::move(value), std::move(m_head));
-    m_head = std::move(new_top);
+    Array<T>::insert(value, Array<T>::end());
 }
 
 template<class T>
 T& CppADS::Stack<T>::top()
 {
-    if (m_head != nullptr)
-    {
-        return m_head->Value;
-    }
-    else
-    {
-        throw std::out_of_range("CppADS::Stack<T>::top: stack is empty");
-    }
+    return Array<T>::operator[](Array<T>::size() - 1);
 }
 
 template<class T>
 const T& CppADS::Stack<T>::top() const
 {
-    if (m_head != nullptr)
-    {
-        return m_head->Value;
-    }
-    else
-    {
-        throw std::out_of_range("CppADS::Stack<T>::top: stack is empty");
-    }
+    return Array<T>::operator[](Array<T>::size() - 1);
 }
 
 template<class T>
 void CppADS::Stack<T>::pop()
 {
-    m_size--;
-    m_head = std::move(m_head->Next);
+    Array<T>::remove(Array<T>::end());
 }
 #endif //STACK_H

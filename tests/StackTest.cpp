@@ -4,7 +4,7 @@
 
 using CppADS::Stack;
 
-TEST(StackTest, ConstructStackTest)
+TEST(StackTest, ConstructTest)
 {
     Stack<int> stack_init {0,1,2,3,4,5,6};
     ASSERT_EQ(stack_init.size(), 7);
@@ -27,7 +27,7 @@ TEST(StackTest, ConstructStackTest)
     ASSERT_EQ(stack_move.size(), 0);
 }
 
-TEST(StackTest, AssignStackTest)
+TEST(StackTest, AssignTest)
 {
     Stack<int> stack_init {0,1,2,3,4,5,6};
     ASSERT_EQ(stack_init.size(), 7);
@@ -52,7 +52,22 @@ TEST(StackTest, AssignStackTest)
     ASSERT_EQ(stack_move.size(), 0);
 }
 
-TEST(StackTest, ModifyStackTest)
+TEST(StackTest, IteratorTest)
+{
+    Stack<int> it_stack;
+    for (int i = 0; i < 32; i++)
+        it_stack.push(i);
+
+    Stack<int> compare_stack(it_stack);
+
+    for (auto it = it_stack.begin(); it != it_stack.end(); it++)
+    {
+        ASSERT_EQ(*it, compare_stack.top());
+        compare_stack.pop();
+    }
+}
+
+TEST(StackTest, ModifyTest)
 {
     Stack<int> stack;
     for (int i = 0; i < 100; i++)
