@@ -42,27 +42,34 @@ namespace CppADS
         /// @brief Insert value to container
         /// @param value inserted value
         /// @param iterator position to insert
-        void insert(const T& value, iterator position_after);
+        void insert_after(const T& value, iterator position);
 
         /// @brief Insert value to container
         /// @param value inserted value
         /// @param iterator position to insert
-        void insert(T&& value, iterator position_after);
-
-        void push_back(const T& value);
-
-        void push_back(T&& value);
-
-        void push_front(const T& value);
-
-        void push_front(T&& value);
+        void insert_after(T&& value, iterator position);
 
         /// @brief Remove values from container
         /// @param iterator position of item to delet
-        void remove(iterator position_after);
+        void remove_after(iterator position);
 
-        void remove_back();
+        /// @brief Add value to the tail of list
+        /// @param value - added value
+        void push_back(const T& value);
 
+        /// @brief Add value to the tail of list
+        /// @param value - added value
+        void push_back(T&& value);
+
+        /// @brief Add value to the head of list
+        /// @param value - added value
+        void push_front(const T& value);
+
+        /// @brief Add value to the head of list
+        /// @param value - added value
+        void push_front(T&& value);
+
+        /// @brief Remove first value of the list
         void remove_front();
 
         /// @brief Access to item
@@ -86,12 +93,21 @@ namespace CppADS
         const_iterator find(const T& value) const;
 
         iterator begin() {
-            return iterator(m_head.get());
+            return iterator(m_head->next.get());
         }
         const_iterator begin() const {
-            return const_iterator(m_head.get());
+            return const_iterator(m_head->next.get());
         }
         const_iterator cbegin() const {
+            return const_iterator(m_head->next.get());
+        }
+        iterator before_begin() {
+            return iterator(m_head.get());
+        }
+        const_iterator before_begin() const {
+            return const_iterator(m_head.get());
+        }
+        const_iterator cbefore_begin() const {
             return const_iterator(m_head.get());
         }
         iterator end() {
@@ -108,17 +124,23 @@ namespace CppADS
         bool operator!=(const ForwardList<T>& rhs) const;
 
     private:
-        struct Node
-        {
-            T value {};
-            std::unique_ptr<Node> next { nullptr };
-            Node(T _value, std::unique_ptr<Node> _next)
-                : value(_value), next(std::move(_next)) {}
-        };
+        struct Node;
 
-        std::unique_ptr<Node> m_head { nullptr };
-        Node* m_tail { nullptr };
+        std::shared_ptr<Node> m_head = std::make_shared<Node>(nullptr, nullptr);
+        Node* m_tail  = m_head.get();
         size_t m_size { 0 };
+    };
+
+    template<class T>
+    struct ForwardList<T>::Node
+    {
+        std::unique_ptr<T> value { nullptr };
+        std::unique_ptr<Node> next { nullptr };
+
+        Node(std::unique_ptr<T> _value, std::unique_ptr<Node> _next)
+            : value(std::move(_value)), next(std::move(_next)) {}
+        Node(T _value, std::unique_ptr<Node> _next)
+            : value(std::make_unique<T>(_value)), next(std::move(_next)) {}
     };
 
     template<class T>
@@ -133,26 +155,20 @@ namespace CppADS
         ~iterator() {m_ptr = nullptr;}
 
         ForwardList<T>::reference operator*() {
-            return m_ptr->value;
+            if (m_ptr->value == nullptr)
+                throw std::out_of_range("CppADS::ForwardList<T>::iterator::operator*: sentinel hasn't any value");
+            return *(m_ptr->value);
         }
         ForwardList<T>::pointer operator->() {
-            return &(m_ptr->value);
+            return m_ptr->value.get();
         }
 
         iterator& operator++() {
             m_ptr = m_ptr->next.get();
             return *this;
         }
-        iterator& operator--() {
-            m_ptr = m_ptr->prev->get();
-            return *this;
-        }
         iterator& operator++(int) {
             m_ptr = m_ptr->next.get();
-            return *this;
-        }
-        iterator& operator--(int) {
-            m_ptr = m_ptr->prev.get();
             return *this;
         }
 
@@ -176,26 +192,20 @@ namespace CppADS
         ~const_iterator() {m_ptr = nullptr;}
 
         ForwardList<T>::const_reference operator*() {
-            return m_ptr->value;
+            if (m_ptr->value == nullptr)
+                throw std::out_of_range("CppADS::ForwardList<T>::const_iterator::operator*: sentinel hasn't any value");
+            return *(m_ptr->value);
         }
         ForwardList<T>::const_pointer operator->() {
-            return &(m_ptr->value);
+            return m_ptr->value.get();
         }
 
         const_iterator& operator++() {
             m_ptr = m_ptr->next.get();
             return *this;
         }
-        const_iterator& operator--() {
-            m_ptr = m_ptr->prev->get();
-            return *this;
-        }
         const_iterator& operator++(int) {
             m_ptr = m_ptr->next.get();
-            return *this;
-        }
-        const_iterator& operator--(int) {
-            m_ptr = m_ptr->prev.get();
             return *this;
         }
 
@@ -205,8 +215,6 @@ namespace CppADS
         bool operator!=(const const_iterator& rhs) const {
             return m_ptr != rhs.m_ptr;
         }
-
-        friend class ForwardList;
     };
 }
 
@@ -257,8 +265,9 @@ CppADS::ForwardList<T>& CppADS::ForwardList<T>::operator=(ForwardList<T>&& move)
 template<typename T>
 void CppADS::ForwardList<T>::clear()
 {
-    while(begin() != end())
-        remove(end());
+    m_head->next.reset(nullptr);
+    m_tail = nullptr;
+    m_size = 0;
 }
 
 template<typename T>
@@ -268,25 +277,36 @@ size_t CppADS::ForwardList<T>::size() const
 }
 
 template<typename T>
-void CppADS::ForwardList<T>::insert(const T& value, iterator position_after)
+void CppADS::ForwardList<T>::insert_after(const T& value, iterator position)
 {
-    std::unique_ptr<Node> new_node = std::make_unique<Node>(value, std::move(position_after.m_ptr->next));
-    position_after.m_ptr->next= std::move(new_node);
+    std::unique_ptr<Node> new_node = std::make_unique<Node>(value, std::move(position.m_ptr->next));
+    position.m_ptr->next= std::move(new_node);
     m_size++;
 
-    if(position_after.m_ptr->next->next == nullptr)
-        m_tail = position_after.m_ptr->next.get();
+    if(position.m_ptr->next->next == nullptr)
+        m_tail = position.m_ptr->next.get();
 }
 
 template<typename T>
-void CppADS::ForwardList<T>::insert(T&& value, iterator position_after)
+void CppADS::ForwardList<T>::insert_after(T&& value, iterator position)
 {
-    std::unique_ptr<Node> new_node = std::make_unique<Node>(std::move(value), std::move(position_after->next));
-    position_after->next = std::move(new_node);
+    std::unique_ptr<Node> new_node = std::make_unique<Node>(std::move(value), std::move(position.m_ptr->next));
+    position.m_ptr->next = std::move(new_node);
     m_size++;
 
-    if(position_after->next->next == nullptr)
-        m_tail = position_after->next.get();
+    if(position.m_ptr->next->next == nullptr)
+        m_tail = position.m_ptr->next.get();
+}
+
+template<typename T>
+void CppADS::ForwardList<T>::remove_after(iterator position)
+{
+    auto tmp = std::move(position.m_ptr->next->next);
+    position.m_ptr->next = std::move(tmp);
+    m_size--;
+
+    if(position.m_ptr->next == nullptr)
+        m_tail = position.m_ptr;
 }
 
 template<typename T>
@@ -308,42 +328,19 @@ void CppADS::ForwardList<T>::push_back(T&& value)
 template<typename T>
 void CppADS::ForwardList<T>::push_front(const T& value)
 {
-    std::unique_ptr<Node> front = std::make_unique<Node>(value, std::move(m_head));
-    m_head = std::move(front);
-    m_size++;
+    insert_after(value, before_begin());
 }
 
 template<typename T>
 void CppADS::ForwardList<T>::push_front(T&& value)
 {
-    std::unique_ptr<Node> front = std::make_unique<Node>(std::move(value), std::move(m_head));
-    m_head = std::move(front);
-    m_size++;
+    insert_after(std::move(value), before_begin());
 }
 
 template<typename T>
-void CppADS::ForwardList<T>::remove(iterator position_after)
+void CppADS::ForwardList<T>::remove_front()
 {
-    auto tmp = std::move(position_after.m_ptr->next->next);
-    position_after.m_ptr->next = std::move(tmp);
-    m_size--;
-
-    if(position_after.m_ptr->next == nullptr)
-        m_tail = position_after.m_ptr;
-}
-
-template<typename T>
-void CppADS::ForwardList<T>:: remove_back()
-{
-
-}
-
-template<typename T>
-void CppADS::ForwardList<T>:: remove_front()
-{
-    std::unique_ptr<Node> front = std::move(m_head->next);
-    m_head = std::move(front);
-    m_size--;
+    remove_after(before_begin());
 }
 
 template<typename T>
@@ -375,6 +372,9 @@ typename CppADS::ForwardList<T>::const_iterator CppADS::ForwardList<T>::find(con
 template<typename T>
 T& CppADS::ForwardList<T>::operator[](size_t index)
 {
+    if (index >= m_size)
+        throw std::out_of_range("CppADS::ForwardList<T>::operator[]: index is out of range");
+
     auto it = begin();
     for (int i = 0; i < index; i++)
     {
@@ -386,6 +386,9 @@ T& CppADS::ForwardList<T>::operator[](size_t index)
 template<typename T>
 const T& CppADS::ForwardList<T>::operator[](size_t index) const
 {
+    if (index >= m_size)
+        throw std::out_of_range("CppADS::ForwardList<T>::operator[]: index is out of range");
+
     auto it = cbegin();
     for (int i = 0; i < index; i++)
     {
