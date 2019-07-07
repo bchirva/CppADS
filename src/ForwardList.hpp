@@ -126,7 +126,7 @@ namespace CppADS
     private:
         struct Node;
 
-        std::shared_ptr<Node> m_head = std::make_shared<Node>(nullptr, nullptr);
+        std::unique_ptr<Node> m_head = std::make_unique<Node>(nullptr, nullptr);
         Node* m_tail = m_head.get();
         size_t m_size { 0 };
     };
