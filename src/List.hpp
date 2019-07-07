@@ -112,21 +112,25 @@ namespace CppADS
             return std::reverse_iterator<const_iterator>();
         };
 
-
+        bool operator==(const List<T>& rhs) const;
+        bool operator!=(const List<T>& rhs) const;
 
     private:
-        struct Node
-        {
-            std::unique_ptr<T> value   { nullptr };
-            std::shared_ptr<Node> next { nullptr };
-            std::shared_ptr<Node> prev { nullptr };
-            Node(T _value, std::shared_ptr<Node> _next, std::shared_ptr<Node> _prev)
-                : value(std::make_unique<T>(_value)), next(_next), prev(_prev) {}
-        };
+        struct Node;
 
         std::shared_ptr<Node> m_first { nullptr };
         std::shared_ptr<Node> m_last { nullptr };
         size_t m_size { 0 };
+    };
+
+    template<class T>
+    struct List<T>::Node
+    {
+        std::unique_ptr<T> value   { nullptr };
+        std::shared_ptr<Node> next { nullptr };
+        std::shared_ptr<Node> prev { nullptr };
+        Node(T _value, std::shared_ptr<Node> _next, std::shared_ptr<Node> _prev)
+            : value(std::make_unique<T>(_value)), next(_next), prev(_prev) {}
     };
 
     template<class T>
@@ -276,9 +280,10 @@ size_t CppADS::List<T>::size() const
 template<typename T>
 void CppADS::List<T>::insert(const T& value, iterator position)
 {
+    /*
     auto next = position.m_ptr->next;
     auto prev = position.m_ptr->prev;
-    std::shared_ptr<Node> new_node = std::make_shared<Node>(value, next, prev);
+    std::shared_ptr<Node> new_node = std::make_shared<Node>(value, next, prev);*/
 
 }
 
@@ -291,13 +296,13 @@ void CppADS::List<T>::insert(T&& value, iterator position)
 template<typename T>
 void CppADS::List<T>::remove(iterator position)
 {
-    auto next = position.m_ptr->next;
+/*    auto next = position.m_ptr->next;
     auto prev = position.m_ptr->prev;
     if (next != nullptr)
         next->next = prev;
     if (prev != nullptr)
         prev->prev = next;
-    m_size--;
+    m_size--;*/
 }
 
 template<typename T>
@@ -329,6 +334,9 @@ typename CppADS::List<T>::const_iterator CppADS::List<T>::find(const T& value) c
 template<typename T>
 T& CppADS::List<T>::operator[](size_t index)
 {
+    if (index >= m_size)
+        throw std::out_of_range("CppADS::List<T>::operator[]: index is out of range");
+
     auto it = begin();
     for (int i = 0; i < index; i++)
     {
@@ -340,6 +348,9 @@ T& CppADS::List<T>::operator[](size_t index)
 template<typename T>
 const T& CppADS::List<T>::operator[](size_t index) const
 {
+    if (index >= m_size)
+        throw std::out_of_range("CppADS::List<T>::operator[]: index is out of range");
+
     auto it = cbegin();
     for (int i = 0; i < index; i++)
     {
@@ -347,5 +358,31 @@ const T& CppADS::List<T>::operator[](size_t index) const
     }
     return *it;
 }
+
+template<class T>
+bool CppADS::List<T>::operator==(const List<T>& rhs) const
+{
+    if (this->m_size != rhs.m_size)
+        return false;
+
+    auto this_it = this->cbegin();
+    auto rhs_it = rhs.cbegin();
+    while (this_it != this->cend() && rhs_it != rhs.cend())
+    {
+        if (*this_it != *rhs_it)
+            return false;
+        ++this_it;
+        ++rhs_it;
+    }
+
+    return true;
+}
+
+template<class T>
+bool CppADS::List<T>::operator!=(const List<T>& rhs) const
+{
+    return !(*this == rhs);
+}
+
 
 #endif //DOUBLEList_H

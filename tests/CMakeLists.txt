@@ -10,6 +10,10 @@ add_executable(ForwardListTest ForwardListTest.cpp)
 target_link_libraries(ForwardListTest PRIVATE GTest::GTest CppADS::CppADS)
 add_test(ForwardListTest "ForwardListTest")
 
+add_executable(ListTest ListTest.cpp)
+target_link_libraries(ListTest PRIVATE GTest::GTest CppADS::CppADS)
+add_test(ListTest "ListTest")
+
 add_executable(StackTest StackTest.cpp)
 target_link_libraries(StackTest PRIVATE GTest::GTest CppADS::CppADS)
 add_test(StackTest "StackTest")
