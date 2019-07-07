@@ -127,7 +127,7 @@ namespace CppADS
         struct Node;
 
         std::shared_ptr<Node> m_head = std::make_shared<Node>(nullptr, nullptr);
-        Node* m_tail  = m_head.get();
+        Node* m_tail = m_head.get();
         size_t m_size { 0 };
     };
 
@@ -284,7 +284,7 @@ void CppADS::ForwardList<T>::insert_after(const T& value, iterator position)
     m_size++;
 
     if(position.m_ptr->next->next == nullptr)
-        m_tail = position.m_ptr->next.get();
+        m_tail = position.m_ptr;
 }
 
 template<typename T>
@@ -314,6 +314,7 @@ void CppADS::ForwardList<T>::push_back(const T& value)
 {
     std::unique_ptr<Node> back = std::make_unique<Node>(value, nullptr);
     m_tail->next = std::move(back);
+    m_tail = m_tail->next.get();
     m_size++;
 }
 
@@ -322,6 +323,7 @@ void CppADS::ForwardList<T>::push_back(T&& value)
 {
     std::unique_ptr<Node> back = std::make_unique<Node>(std::move(value), nullptr);
     m_tail->next = std::move(back);
+    m_tail = m_tail->next.get();
     m_size++;
 }
 
