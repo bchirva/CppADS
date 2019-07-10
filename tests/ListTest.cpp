@@ -3,6 +3,7 @@
 #include "List.hpp"
 using CppADS::List;
 
+
 TEST(ListTest, ConstructTest)
 {
     List<int> list_empty;
@@ -52,7 +53,7 @@ TEST(ListTest, FindTest)
     auto end = list.find(-1);
 
     ASSERT_EQ(end, list.end());
-    //ASSERT_EQ(item, list.begin() + 2);
+    ASSERT_EQ(item, (list.begin()++)++);
 }
 
 TEST(ListTest, AssignTest)
@@ -81,7 +82,7 @@ TEST(ListTest, AccessTest)
         const int var = list[66];
         (void)(var);
     } catch (std::out_of_range& exception) {
-        ASSERT_EQ(exception.what(), std::string("CppADS::list<T>::operator[]: index is out of range"));
+        ASSERT_EQ(exception.what(), std::string("CppADS::List<T>::operator[]: index is out of range"));
     }
 
     list[5] = 50;
@@ -91,57 +92,34 @@ TEST(ListTest, AccessTest)
 
 TEST(ListTest, InsertTest)
 {
-    /*List<int> list {0, 1, 2, 3, 4, 5, 6, 7};
+    List<int> list {0, 1, 2, 3, 4, 5, 6, 7};
     int value { -11 };
 
-    list.insert(value, 0);
+    list.push_front(value);
     list.insert(100, list.begin());
-    list.insert(9000, list.size());
+    list.push_back(9000);
     list.insert(1234, list.end());
-    list.insert(789, 5);
+    list.insert(789, list.find(3));
 
     ASSERT_EQ(list, List<int>({100, -11, 0, 1, 2, 789, 3, 4, 5, 6, 7, 9000, 1234}));
     ASSERT_EQ(list.size(), 13);
-
-    try {
-        list.insert(42, 666);
-    } catch (std::out_of_range& exception) {
-        ASSERT_EQ(exception.what(), std::string("CppADS::list<T>::insert: index is out of range"));
-    }
-    try {
-        list.insert(42, list.begin() - 666);
-    } catch (std::out_of_range& exception) {
-        ASSERT_EQ(exception.what(), std::string("CppADS::list<T>::insert: iterator is invalid"));
-    }*/
-
 }
 
 TEST(ListTest, RemoveTest)
 {
     List<int> list {0, 1, 2, 3, 4, 5, 6, 7};
 
-    /*list.remove(3);
-    list.remove(list.begin() + 2);
+    list.remove(list.find(3));
     list.remove(list.begin());
     list.remove(--list.end());
+    list.pop_back();
+    list.pop_front();
 
-    ASSERT_EQ(list, List<int>({1,4,5,6}));
-    ASSERT_EQ(list.size(), 4);
+    ASSERT_EQ(list, List<int>({2,4,5}));
+    ASSERT_EQ(list.size(), 3);
 
     list.clear();
     ASSERT_EQ(list.size(), 0);
-
-    try {
-        list.remove(66);
-    } catch (std::out_of_range& exception) {
-        ASSERT_EQ(exception.what(), std::string("CppADS::list<T>::remove: index is out of range"));
-    }
-
-    try {
-        list.remove(list.begin() - 99);
-    } catch (std::out_of_range& exception) {
-        ASSERT_EQ(exception.what(), std::string("CppADS::list<T>::remove: iterator is invalid"));
-    }*/
 }
 
 int main(int argc, char** argv)

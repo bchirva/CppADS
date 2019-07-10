@@ -24,10 +24,10 @@ namespace CppADS
         using reverse_iterator = std::reverse_iterator<iterator>;
         using const_reverse_iterator = std::reverse_iterator<const_iterator>;
 
-        List() = default;                           ///< Default constructor
+        List();                                     ///< Default constructor
         List(const List<T>& copy);                  ///< Copy contructor
         List(List<T>&& move);                       ///< Move contructor
-        List(std::initializer_list<T> init_List);   ///< Contructor from initializer List
+        List(std::initializer_list<T> init_list);   ///< Contructor from initializer List
 
         List& operator=(const List<T>& copy);       ///< Copy assignment operator
         List& operator=(List<T>&& move);            ///< Move assignment operator
@@ -55,6 +55,28 @@ namespace CppADS
         /// @param iterator position of item to delet
         void remove(iterator position);
 
+        /// @brief Add value to the tail of list
+        /// @param value - added value
+        void push_back(const T& value);
+
+        /// @brief Add value to the tail of list
+        /// @param value - added value
+        void push_back(T&& value);
+
+        /// @brief Add value to the head of list
+        /// @param value - added value
+        void push_front(const T& value);
+
+        /// @brief Add value to the head of list
+        /// @param value - added value
+        void push_front(T&& value);
+
+        /// @brief Remove first value of the list
+        void pop_front();
+
+        /// @brief Remove first value of the list
+        void pop_back();
+
         /// @brief Access to item
         /// @param index item position
         /// @return reference to value
@@ -76,22 +98,22 @@ namespace CppADS
         const_iterator find(const T& value) const;
 
         iterator begin() {
-            return iterator(m_first.get());
+            return iterator(m_sentinel->next.get());
         }
         const_iterator begin() const {
-            return const_iterator(m_first.get());
+            return const_iterator(m_sentinel->next.get());
         }
         const_iterator cbegin() const {
-            return const_iterator(m_first.get());
+            return const_iterator(m_sentinel->next.get());
         }
         iterator end() {
-            return iterator(nullptr);
+            return iterator(m_sentinel.get());
         }
         const_iterator end() const {
-            return const_iterator(nullptr);
+            return const_iterator(m_sentinel.get());
         }
         const_iterator cend() const {
-            return const_iterator(nullptr);
+            return const_iterator(m_sentinel.get());
         }
         reverse_iterator rbegin() {
             return std::reverse_iterator<iterator>();
@@ -118,8 +140,7 @@ namespace CppADS
     private:
         struct Node;
 
-        std::shared_ptr<Node> m_first { nullptr };
-        std::shared_ptr<Node> m_last { nullptr };
+        std::shared_ptr<Node> m_sentinel = std::make_shared<Node>(nullptr, nullptr, nullptr);
         size_t m_size { 0 };
     };
 
@@ -129,6 +150,8 @@ namespace CppADS
         std::unique_ptr<T> value   { nullptr };
         std::shared_ptr<Node> next { nullptr };
         std::shared_ptr<Node> prev { nullptr };
+        Node(std::unique_ptr<T> _value, std::shared_ptr<Node> _next, std::shared_ptr<Node> _prev)
+            : value(std::move(_value)), next(_next), prev(_prev) {}
         Node(T _value, std::shared_ptr<Node> _next, std::shared_ptr<Node> _prev)
             : value(std::make_unique<T>(_value)), next(_next), prev(_prev) {}
     };
@@ -138,9 +161,10 @@ namespace CppADS
     {
     private:
         List<T>::Node* m_ptr { nullptr };
+        friend class List;
 
     public:
-        iterator(Node* _ptr) : m_ptr(_ptr) {};
+        iterator(Node* _ptr = nullptr) : m_ptr(_ptr) {};
         ~iterator() {m_ptr = nullptr;}
 
         List<T>::reference operator*() {
@@ -155,7 +179,7 @@ namespace CppADS
             return *this;
         }
         iterator& operator--() {
-            m_ptr = m_ptr->prev->get();
+            m_ptr = m_ptr->prev.get();
             return *this;
         }
         iterator& operator++(int) {
@@ -180,16 +204,17 @@ namespace CppADS
     {
     private:
         List<T>::Node* m_ptr { nullptr };
+        friend class List;
 
     public:
-        const_iterator(Node* _ptr) : m_ptr(_ptr) {};
+        const_iterator(Node* _ptr = nullptr) : m_ptr(_ptr) {};
         ~const_iterator() {m_ptr = nullptr;}
 
         List<T>::const_reference operator*() {
             return *(m_ptr->value);
         }
         List<T>::const_pointer operator->() {
-            return m_ptr->value;
+            return m_ptr->value.get();
         }
 
         const_iterator& operator++() {
@@ -197,7 +222,7 @@ namespace CppADS
             return *this;
         }
         const_iterator& operator--() {
-            m_ptr = m_ptr->prev->get();
+            m_ptr = m_ptr->prev.get();
             return *this;
         }
         const_iterator& operator++(int) {
@@ -215,13 +240,19 @@ namespace CppADS
         bool operator!=(const const_iterator& rhs) const {
             return m_ptr != rhs.m_ptr;
         }
-
-        friend class List;
     };
 }
 
 template<typename T>
+CppADS::List<T>::List()
+{
+    m_sentinel->next = m_sentinel;
+    m_sentinel->prev = m_sentinel;
+}
+
+template<typename T>
 CppADS::List<T>::List(const List<T>& copy)
+    : List()
 {
     for (auto it = copy.begin(); it != copy.end(); it++)
         this->insert(*it, this->end());
@@ -231,23 +262,24 @@ CppADS::List<T>::List(const List<T>& copy)
 template<typename T>
 CppADS::List<T>::List(List<T>&& move)
 {
-    m_first = std::move(move.m_first);
-    m_last = std::move(move.m_last);
+    m_sentinel = std::move(move.m_sentinel);
     m_size = std::move(move.m_size);
     move.m_size = 0;
 }
 
 template<typename T>
-CppADS::List<T>::List(std::initializer_list<T> init_List)
+CppADS::List<T>::List(std::initializer_list<T> init_list)
+    : List()
 {
-    for (auto it = init_List.begin(); it != init_List.end(); it++)
+    for (auto it = init_list.begin(); it != init_list.end(); it++)
         this->insert(*it, this->end());
-    m_size = init_List.size();
+    m_size = init_list.size();
 }
 
 template<typename T>
 CppADS::List<T>& CppADS::List<T>::operator=(const List<T>& copy)
 {
+    clear();
     for (auto it = copy.begin(); it != copy.end(); it++)
         this->insert(*it, this->end());
     m_size = copy.m_size;
@@ -257,8 +289,8 @@ CppADS::List<T>& CppADS::List<T>::operator=(const List<T>& copy)
 template<typename T>
 CppADS::List<T>& CppADS::List<T>::operator=(List<T>&& move)
 {
-    m_first = std::move(move.m_first);
-    m_last = std::move(move.m_last);
+    clear();
+    m_sentinel = std::move(move.m_sentinel);
     m_size = std::move(move.m_size);
     move.m_size = 0;
     return *this;
@@ -267,7 +299,7 @@ CppADS::List<T>& CppADS::List<T>::operator=(List<T>&& move)
 template<typename T>
 void CppADS::List<T>::clear()
 {
-    while(begin() != end())
+    while(size() != 0)
         remove(end());
 }
 
@@ -280,29 +312,71 @@ size_t CppADS::List<T>::size() const
 template<typename T>
 void CppADS::List<T>::insert(const T& value, iterator position)
 {
-    /*
-    auto next = position.m_ptr->next;
-    auto prev = position.m_ptr->prev;
-    std::shared_ptr<Node> new_node = std::make_shared<Node>(value, next, prev);*/
+    auto prev = position;
+    prev--;
+    std::shared_ptr<Node> node = std::make_shared<Node>(value, prev.m_ptr->next, position.m_ptr->prev);
+    prev.m_ptr->next = node;
+    position.m_ptr->prev = node;
 
+    m_size++;
 }
 
 template<typename T>
 void CppADS::List<T>::insert(T&& value, iterator position)
 {
+    auto prev = position;
+    prev--;
+    std::shared_ptr<Node> node = std::make_shared<Node>(value, prev.m_ptr->next, position.m_ptr->prev);
+    prev.m_ptr->next = node;
+    position.m_ptr->prev = node;
 
+    m_size++;
 }
 
 template<typename T>
 void CppADS::List<T>::remove(iterator position)
 {
-/*    auto next = position.m_ptr->next;
+    auto next = position.m_ptr->next;
     auto prev = position.m_ptr->prev;
-    if (next != nullptr)
-        next->next = prev;
-    if (prev != nullptr)
-        prev->prev = next;
-    m_size--;*/
+    next->prev = prev;
+    prev->next = next;
+    m_size--;
+}
+
+template<typename T>
+void CppADS::List<T>::push_back(const T& value)
+{
+    this->insert(value, this->end());
+}
+
+template<typename T>
+void CppADS::List<T>::push_back(T&& value)
+{
+    this->insert(std::move(value), this->end());
+}
+
+template<typename T>
+void CppADS::List<T>::push_front(const T& value)
+{
+    this->insert(value, this->begin());
+}
+
+template<typename T>
+void CppADS::List<T>::push_front(T&& value)
+{
+    this->insert(std::move(value), begin());
+}
+
+template<typename T>
+void CppADS::List<T>::pop_front()
+{
+    this->remove(this->begin());
+}
+
+template<typename T>
+void CppADS::List<T>::pop_back()
+{
+    this->remove((this->end()--));
 }
 
 template<typename T>
