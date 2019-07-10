@@ -88,9 +88,10 @@ TEST(ForwardListTest, InsertTest)
     list.push_back(9000);
     list.push_back(1234);
     list.insert_after(789, list.find(2));
+    list.insert_after(17, list.before_begin());
 
-    ASSERT_EQ(list, ForwardList<int>({100, -11, 0, 1, 2, 789, 3, 4, 5, 6, 7, 9000, 1234}));
-    ASSERT_EQ(list.size(), 13);
+    ASSERT_EQ(list, ForwardList<int>({17, 100, -11, 0, 1, 2, 789, 3, 4, 5, 6, 7, 9000, 1234}));
+    ASSERT_EQ(list.size(), 14);
 }
 
 TEST(ForwardListTest, RemoveTest)

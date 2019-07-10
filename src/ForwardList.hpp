@@ -75,12 +75,16 @@ namespace CppADS
         /// @brief Access to item
         /// @param index item position
         /// @return reference to value
-        T& operator[](size_t index);
+        reference operator[](size_t index);
 
         /// @brief Access to item
         /// @param index item position
         /// @return reference to value
-        const T& operator[](size_t index) const;
+        const_reference operator[](size_t index) const;
+
+        /// @brief Access to the first item in list
+        /// @return const reference on first value
+        reference front();
 
         /// @brief Access to the first item in list
         /// @return const reference on first value
@@ -399,11 +403,16 @@ typename CppADS::ForwardList<T>::const_reference CppADS::ForwardList<T>::operato
 }
 
 template<typename T>
-typename CppADS::ForwardList<T>::const_reference CppADS::ForwardList<T>::front() const
+typename CppADS::ForwardList<T>::reference CppADS::ForwardList<T>::front()
 {
     return *(begin());
 }
 
+template<typename T>
+typename CppADS::ForwardList<T>::const_reference CppADS::ForwardList<T>::front() const
+{
+    return *(cbegin());
+}
 
 template<typename T>
 bool CppADS::ForwardList<T>::operator==(const ForwardList<T>& rhs) const

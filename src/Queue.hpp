@@ -3,8 +3,6 @@
 
 #include "ForwardList.hpp"
 
-#include <memory>
-
 namespace CppADS
 {
     template<class T>
@@ -45,6 +43,7 @@ namespace CppADS
         /// @brief Remove front element
         void dequeue();
 
+        reference front();
         /// @brief Get first inserted value
         /// @return value on front of the queue
         const_reference front() const;
@@ -102,6 +101,12 @@ template<typename T>
 void CppADS::Queue<T>::dequeue()
 {
     ForwardList<T>::pop_front();
+}
+
+template<typename T>
+typename CppADS::Queue<T>::reference CppADS::Queue<T>::front()
+{
+    return ForwardList<T>::front();
 }
 
 template<typename T>
