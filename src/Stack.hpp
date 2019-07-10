@@ -1,10 +1,7 @@
 #ifndef STACK_H
 #define STACK_H
 
-#include "Container.hpp"
 #include "Array.hpp"
-
-#include <memory>
 
 namespace CppADS
 {
@@ -162,19 +159,13 @@ namespace CppADS
 }
 
 template<class T>
-CppADS::Stack<T>::Stack(const Stack<T>& copy)
-    : Array<T>(copy)
-{}
+CppADS::Stack<T>::Stack(const Stack<T>& copy) : Array<T>(copy) {}
 
 template<class T>
-CppADS::Stack<T>::Stack(Stack<T>&& move)
-    : Array<T>(move)
-{}
+CppADS::Stack<T>::Stack(Stack<T>&& move) : Array<T>(std::move(move)) {}
 
 template<class T>
-CppADS::Stack<T>::Stack(std::initializer_list<T> init_list)
-    : Array<T>(init_list)
-{}
+CppADS::Stack<T>::Stack(std::initializer_list<T> init_list) : Array<T>(init_list) {}
 
 template<class T>
 CppADS::Stack<T>& CppADS::Stack<T>::operator=(const Stack<T>& copy)
@@ -186,7 +177,7 @@ CppADS::Stack<T>& CppADS::Stack<T>::operator=(const Stack<T>& copy)
 template<class T>
 CppADS::Stack<T>& CppADS::Stack<T>::operator=(Stack<T>&& move)
 {
-    Array<T>::operator=(move);
+    Array<T>::operator=(std::move(move));
     return *this;
 }
 

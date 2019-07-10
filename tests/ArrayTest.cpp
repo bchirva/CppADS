@@ -75,7 +75,7 @@ TEST(ArrayTest, AssignTest)
 
 TEST(ArrayTest, AccessTest)
 {
-    Array<int> array { 0, 1, 2, 3, 4, 5, 6, 7, 8, 9 };
+    Array<int> array { 42, 1, 2, 3, 4, 5, 6, 7, 8, 69 };
 
     try {
         const int var = array[66];
@@ -87,6 +87,8 @@ TEST(ArrayTest, AccessTest)
     array[5] = 50;
     int var = array[5];
     ASSERT_EQ(var, 50);
+    ASSERT_EQ(array.front(), 42);
+    ASSERT_EQ(array.back(), 69);
 }
 
 TEST(ArrayTest, InsertTest)
@@ -99,9 +101,10 @@ TEST(ArrayTest, InsertTest)
     array.insert(9000, array.size());
     array.insert(1234, array.end());
     array.insert(789, 5);
+    array.push_back(42);
 
-    ASSERT_EQ(array, Array<int>({100, -11, 0, 1, 2, 789, 3, 4, 5, 6, 7, 9000, 1234}));
-    ASSERT_EQ(array.size(), 13);
+    ASSERT_EQ(array, Array<int>({100, -11, 0, 1, 2, 789, 3, 4, 5, 6, 7, 9000, 1234, 42}));
+    ASSERT_EQ(array.size(), 14);
 
     try {
         array.insert(42, 666);
@@ -118,12 +121,13 @@ TEST(ArrayTest, InsertTest)
 
 TEST(ArrayTest, RemoveTest)
 {
-    Array<int> array {0, 1, 2, 3, 4, 5, 6, 7};
+    Array<int> array {0, 1, 2, 3, 4, 5, 6, 7, 8};
 
     array.remove(3);
     array.remove(array.begin() + 2);
     array.remove(array.begin());
     array.remove(--array.end());
+    array.pop_back();
 
     ASSERT_EQ(array, Array<int>({1,4,5,6}));
     ASSERT_EQ(array.size(), 4);

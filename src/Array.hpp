@@ -67,6 +67,10 @@ namespace CppADS
         /// @param iterator position to insert
         void insert(T&& value, iterator position);
 
+        void push_back(const T& value);
+
+        void push_back(T&& value);
+
         /// @brief Remove values from container
         /// @param iterator position of item to delete
         void remove(size_t index);
@@ -75,19 +79,25 @@ namespace CppADS
         /// @param iterator position of item to delete
         void remove(iterator position);
 
-        /// @brief Access to item
-        /// @param index item position
-        /// @return reference to value
-        T& operator[](size_t index);
+        void pop_back();
 
         /// @brief Access to item
         /// @param index item position
         /// @return reference to value
-        const T& operator[](size_t index) const;
+        reference operator[](size_t index);
 
-        /// @brief Set function for reserved size calculation
-        /// @param func function
-        void setReserveFunc(std::function<size_t(size_t)>&& func);
+        /// @brief Access to item
+        /// @param index item position
+        /// @return reference to value
+        const_reference operator[](size_t index) const;
+
+        reference back();
+
+        const_reference back() const;
+
+        reference front();
+
+        const_reference front() const;
 
         /// @brief Search for first item equal value
         /// @param value value search for
@@ -98,6 +108,10 @@ namespace CppADS
         /// @param value value search for
         /// @return iterator to found item (end if item not found)
         const_iterator find(const T& value) const;
+
+        /// @brief Set function for reserved size calculation
+        /// @param func function
+        void setReserveFunc(std::function<size_t(size_t)>&& func);
 
         iterator begin() {
             return iterator(m_data.get());
@@ -139,7 +153,7 @@ namespace CppADS
         bool operator==(const Array<T>& rhs) const;
         bool operator!=(const Array<T>& rhs) const;
 
-    protected:
+    private:
         std::unique_ptr<T[]> m_data { nullptr };      ///< Pointer to the data head on heap
         size_t m_size { 0 };                          ///< Array actual size
         size_t m_capacity { 0 };                      ///< Reserved size
@@ -553,6 +567,18 @@ void CppADS::Array<T>::insert(T&& value, iterator position)
 }
 
 template<typename T>
+void CppADS::Array<T>::push_back(const T& value)
+{
+    insert(value, end());
+}
+
+template<typename T>
+void CppADS::Array<T>::push_back(T&& value)
+{
+    insert(std::move(value), end());
+}
+
+template<typename T>
 void CppADS::Array<T>::remove(size_t index)
 {
     if (index > m_size)
@@ -583,7 +609,13 @@ void CppADS::Array<T>::remove(iterator position)
 }
 
 template<typename T>
-T& CppADS::Array<T>::operator[](size_t index)
+void CppADS::Array<T>::pop_back()
+{
+    remove(end()--);
+}
+
+template<typename T>
+typename CppADS::Array<T>::reference CppADS::Array<T>::operator[](size_t index)
 {
     if (index >= m_size)
         throw std::out_of_range("CppADS::Array<T>::operator[]: index is out of range");
@@ -591,11 +623,35 @@ T& CppADS::Array<T>::operator[](size_t index)
 }
 
 template<typename T>
-const T& CppADS::Array<T>::operator[](size_t index) const
+typename CppADS::Array<T>::const_reference CppADS::Array<T>::operator[](size_t index) const
 {
     if (index >= m_size)
         throw std::out_of_range("CppADS::Array<T>::operator[]: index is out of range");
     return m_data[index];
+}
+
+template<typename T>
+typename CppADS::Array<T>::reference CppADS::Array<T>::back()
+{
+    return *(end()--);
+}
+
+template<typename T>
+typename CppADS::Array<T>::const_reference CppADS::Array<T>::back() const
+{
+    return *(cend()--);
+}
+
+template<typename T>
+typename CppADS::Array<T>::reference CppADS::Array<T>::front()
+{
+    return *(begin());
+}
+
+template<typename T>
+typename CppADS::Array<T>::const_reference CppADS::Array<T>::front() const
+{
+    return *(begin());
 }
 
 template<typename T>

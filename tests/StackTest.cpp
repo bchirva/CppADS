@@ -1,7 +1,6 @@
 #include <gtest/gtest.h>
 
 #include "Stack.hpp"
-
 using CppADS::Stack;
 
 TEST(StackTest, ConstructTest)
