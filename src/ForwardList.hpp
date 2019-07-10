@@ -70,7 +70,7 @@ namespace CppADS
         void push_front(T&& value);
 
         /// @brief Remove first value of the list
-        void remove_front();
+        void pop_front();
 
         /// @brief Access to item
         /// @param index item position
@@ -246,6 +246,7 @@ CppADS::ForwardList<T>::ForwardList(std::initializer_list<T> init_list)
 template<typename T>
 CppADS::ForwardList<T>& CppADS::ForwardList<T>::operator=(const ForwardList<T>& copy)
 {
+    clear();
     for (auto it = copy.begin(); it != copy.end(); it++)
         this->push_back(*it);
     m_size = copy.m_size;
@@ -266,7 +267,7 @@ template<typename T>
 void CppADS::ForwardList<T>::clear()
 {
     m_head->next.reset(nullptr);
-    m_tail = nullptr;
+    m_tail = m_head.get();
     m_size = 0;
 }
 
@@ -334,7 +335,7 @@ void CppADS::ForwardList<T>::push_front(T&& value)
 }
 
 template<typename T>
-void CppADS::ForwardList<T>::remove_front()
+void CppADS::ForwardList<T>::pop_front()
 {
     remove_after(before_begin());
 }

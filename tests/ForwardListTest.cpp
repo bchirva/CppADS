@@ -98,7 +98,7 @@ TEST(ForwardListTest, RemoveTest)
 
     list.remove_after(list.find(2));
     list.remove_after(list.begin()++);
-    list.remove_front();
+    list.pop_front();
 
     ASSERT_EQ(list, ForwardList<int>({1,4,5,6,7}));
     ASSERT_EQ(list.size(), 5);
