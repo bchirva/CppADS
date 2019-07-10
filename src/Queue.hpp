@@ -1,7 +1,7 @@
 #ifndef QUEUE_HPP
 #define QUEUE_HPP
 
-#include "Container.hpp"
+#include "ForwardList.hpp"
 
 #include <memory>
 
@@ -9,7 +9,7 @@ namespace CppADS
 {
     template<class T>
     /// @brief Queue (FIFO) class
-    class Queue : public IContainer
+    class Queue : private ForwardList<T>
     {
     public:
         using value_type = T;
@@ -47,172 +47,67 @@ namespace CppADS
 
         /// @brief Get first inserted value
         /// @return value on front of the queue
-        T& front();
-
-        /// @brief Overloaded method
-        const T& front() const;
-
-    private:
-        struct Node
-        {
-            T Value;
-            std::shared_ptr<Node> Next { nullptr };
-            Node(T _value, std::shared_ptr<Node>&& _next = nullptr)
-                : Value(_value), Next(std::move(_next)) {}
-        };
-
-        std::shared_ptr<Node> m_tail { nullptr };   ///< Back (last inserted) item
-        std::shared_ptr<Node> m_head { nullptr };   ///< Front (first inserted) item
-        size_t m_size { 0 };
+        const_reference front() const;
     };
 }
 
 template<typename T>
-CppADS::Queue<T>::Queue(const Queue<T>& copy)
-{
-    m_size = copy.m_size;
-
-    std::shared_ptr<Node>* self_node = &m_head;
-    const std::shared_ptr<Node>* self_back_node = nullptr;
-    const std::shared_ptr<Node>* copy_node = &(copy.m_head);
-
-    while ((*copy_node) != nullptr)
-    {
-        *self_node = std::make_shared<Node>(copy_node->get()->Value);
-
-        self_back_node = self_node;
-        self_node = &(self_node->get()->Next);
-        copy_node = &(copy_node->get()->Next);
-    }
-    m_tail = *self_back_node;
-}
+CppADS::Queue<T>::Queue(const Queue<T>& copy) : ForwardList<T>(copy) {}
 
 template<typename T>
-CppADS::Queue<T>::Queue(Queue<T>&& move)
-{
-    m_size = std::move(move.m_size);
-    m_tail = std::move(move.m_tail);
-    m_head = std::move(move.m_head);
-    move.m_size = 0;
-}
+CppADS::Queue<T>::Queue(Queue<T>&& move) : ForwardList<T>(std::move(move)) {}
 
 template<typename T>
-CppADS::Queue<T>::Queue(std::initializer_list<T> init_list)
-{
-    for(auto it = std::rbegin(init_list); it != std::rend(init_list); it++)
-    {
-        enqueue(*it);
-    }
-}
+CppADS::Queue<T>::Queue(std::initializer_list<T> init_list) : ForwardList<T>(init_list) {}
 
 template<typename T>
 CppADS::Queue<T>& CppADS::Queue<T>::operator=(const Queue<T>& copy)
 {
-    clear();
-    m_size = copy.m_size;
-
-    std::shared_ptr<Node>* self_node = &m_head;
-    const std::shared_ptr<Node>* self_back_node = nullptr;
-    const std::shared_ptr<Node>* copy_node = &(copy.m_head);
-
-    while ((*copy_node) != nullptr)
-    {
-        *self_node = std::make_shared<Node>(copy_node->get()->Value);
-
-        self_back_node = self_node;
-        self_node = &(self_node->get()->Next);
-        copy_node = &(copy_node->get()->Next);
-    }
-    m_tail = *self_back_node;
+    ForwardList<T>::operator=(copy);
     return *this;
 }
 
 template<typename T>
 CppADS::Queue<T>& CppADS::Queue<T>::operator=(Queue<T>&& move)
 {
-    clear();
-    m_size = std::move(move.m_size);
-    m_tail = std::move(move.m_tail);
-    m_head = std::move(move.m_head);
-    move.m_size = 0;
-
+    ForwardList<T>::operator=(std::move(move));
     return *this;
 }
 
 template<typename T>
 size_t CppADS::Queue<T>::size() const
 {
-    return m_size;
+    return ForwardList<T>::size();
 }
 
 template<typename T>
 void CppADS::Queue<T>::clear()
 {
-    while(m_head != nullptr)
-        dequeue();
+    ForwardList<T>::clear();
 }
 
 template<typename T>
 void CppADS::Queue<T>::enqueue(const T& value)
 {
-    if (m_tail != nullptr)
-    {
-        m_tail->Next = std::make_shared<Node>(value, nullptr);
-        m_tail = m_tail->Next;
-    }
-    else
-    {
-        m_tail = m_head = std::make_shared<Node>(value, nullptr);
-    }
-
-    m_size++;
+    ForwardList<T>::push_back(value);
 }
 
 template<typename T>
 void CppADS::Queue<T>::enqueue(T&& value)
 {
-    if (m_tail != nullptr)
-    {
-        m_tail->Next = std::make_shared<Node>(std::move(value), nullptr);
-        m_tail = m_tail->Next;
-    }
-    else
-    {
-        m_tail = m_head = std::make_shared<Node>(std::move(value), nullptr);
-    }
-
-    m_size++;
+    ForwardList<T>::push_back(std::move(value));
 }
 
 template<typename T>
 void CppADS::Queue<T>::dequeue()
 {
-    if (m_head != nullptr)
-    {
-        m_head = std::move(m_head->Next);
-        m_size--;
-
-        if(m_tail.unique())
-            m_tail.reset();
-    }
+    ForwardList<T>::pop_front();
 }
 
 template<typename T>
-T& CppADS::Queue<T>::front()
+typename CppADS::Queue<T>::const_reference CppADS::Queue<T>::front() const
 {
-    if (m_head != nullptr)
-        return m_head->Value;
-    else
-        throw std::out_of_range("CppADS::Queue<T>::front: queue is empty");
-}
-
-template<typename T>
-const T& CppADS::Queue<T>::front() const
-{
-    if (m_head != nullptr)
-        return m_head->Value;
-    else
-        throw std::out_of_range("CppADS::Queue<T>::front: queue is empty");
+    return ForwardList<T>::front();
 }
 
 #endif //QUEUE_HPP
