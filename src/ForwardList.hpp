@@ -151,7 +151,7 @@ namespace CppADS
         friend class ForwardList;
 
     public:
-        iterator(Node* _ptr) : m_ptr(_ptr) {};
+        iterator(Node* _ptr = nullptr) : m_ptr(_ptr) {};
         ~iterator() {m_ptr = nullptr;}
 
         ForwardList<T>::reference operator*() {
@@ -188,7 +188,7 @@ namespace CppADS
         friend class ForwardList;
 
     public:
-        const_iterator(Node* _ptr) : m_ptr(_ptr) {};
+        const_iterator(Node* _ptr = nullptr) : m_ptr(_ptr) {};
         ~const_iterator() {m_ptr = nullptr;}
 
         ForwardList<T>::const_reference operator*() {
@@ -280,11 +280,11 @@ template<typename T>
 void CppADS::ForwardList<T>::insert_after(const T& value, iterator position)
 {
     std::unique_ptr<Node> new_node = std::make_unique<Node>(value, std::move(position.m_ptr->next));
-    position.m_ptr->next= std::move(new_node);
+    position.m_ptr->next = std::move(new_node);
     m_size++;
 
     if(position.m_ptr->next->next == nullptr)
-        m_tail = position.m_ptr;
+        m_tail = position.m_ptr->next.get();
 }
 
 template<typename T>
@@ -312,19 +312,13 @@ void CppADS::ForwardList<T>::remove_after(iterator position)
 template<typename T>
 void CppADS::ForwardList<T>::push_back(const T& value)
 {
-    std::unique_ptr<Node> back = std::make_unique<Node>(value, nullptr);
-    m_tail->next = std::move(back);
-    m_tail = m_tail->next.get();
-    m_size++;
+    insert_after(value, iterator(m_tail));
 }
 
 template<typename T>
 void CppADS::ForwardList<T>::push_back(T&& value)
 {
-    std::unique_ptr<Node> back = std::make_unique<Node>(std::move(value), nullptr);
-    m_tail->next = std::move(back);
-    m_tail = m_tail->next.get();
-    m_size++;
+    insert_after(std::move(value), iterator(m_tail));
 }
 
 template<typename T>
