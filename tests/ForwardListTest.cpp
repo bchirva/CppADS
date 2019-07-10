@@ -63,7 +63,7 @@ TEST(ForwardListTest, FindTest)
 
 TEST(ForwardListTest, AccessTest)
 {
-    ForwardList<int> list { 0, 1, 2, 3, 4, 5, 6, 7, 8, 9 };
+    ForwardList<int> list { 42, 1, 2, 3, 4, 5, 6, 7, 8, 9 };
 
     try {
         const int var = list[66];
@@ -75,6 +75,7 @@ TEST(ForwardListTest, AccessTest)
     list[5] = 50;
     int var = list[5];
     ASSERT_EQ(var, 50);
+    ASSERT_EQ(list.front(), 42);
 }
 
 TEST(ForwardListTest, InsertTest)

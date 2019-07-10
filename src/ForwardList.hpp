@@ -82,6 +82,10 @@ namespace CppADS
         /// @return reference to value
         const T& operator[](size_t index) const;
 
+        /// @brief Access to the first item in list
+        /// @return const reference on first value
+        const_reference front() const;
+
         /// @brief Search for first item equal value
         /// @param value value search for
         /// @return iterator to found item (end if item not found)
@@ -367,7 +371,7 @@ typename CppADS::ForwardList<T>::const_iterator CppADS::ForwardList<T>::find(con
 }
 
 template<typename T>
-T& CppADS::ForwardList<T>::operator[](size_t index)
+typename CppADS::ForwardList<T>::reference CppADS::ForwardList<T>::operator[](size_t index)
 {
     if (index >= m_size)
         throw std::out_of_range("CppADS::ForwardList<T>::operator[]: index is out of range");
@@ -381,7 +385,7 @@ T& CppADS::ForwardList<T>::operator[](size_t index)
 }
 
 template<typename T>
-const T& CppADS::ForwardList<T>::operator[](size_t index) const
+typename CppADS::ForwardList<T>::const_reference CppADS::ForwardList<T>::operator[](size_t index) const
 {
     if (index >= m_size)
         throw std::out_of_range("CppADS::ForwardList<T>::operator[]: index is out of range");
@@ -393,6 +397,13 @@ const T& CppADS::ForwardList<T>::operator[](size_t index) const
     }
     return *it;
 }
+
+template<typename T>
+typename CppADS::ForwardList<T>::const_reference CppADS::ForwardList<T>::front() const
+{
+    return *(begin());
+}
+
 
 template<typename T>
 bool CppADS::ForwardList<T>::operator==(const ForwardList<T>& rhs) const
