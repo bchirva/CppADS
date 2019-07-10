@@ -1,15 +1,13 @@
 #ifndef DEQUE_HPP
 #define DEQUE_HPP
 
-#include "Container.hpp"
-
-#include <memory>
+#include "List.hpp"
 
 namespace CppADS
 {
     template<typename T>
     /// @brief Double-endian queue class
-    class Deque : public IContainer
+    class Deque : public List<T>
     {
     public:
         using value_type = T;
@@ -57,253 +55,116 @@ namespace CppADS
 
         /// @brief Access to the first element
         /// @return Reference to the first element
-        T& front();
+        reference front();
 
         /// @brief Access to the first element
         /// @return Reference to the first element
-        const T& front() const;
+        const_reference front() const;
 
         /// @brief Access to the last element
         /// @return Reference to the last element
-        T& back();
+        reference back();
 
         /// @brief Access to the last element
         /// @return Reference to the last element
-        const T& back() const;
-
-    private:
-        struct Node
-        {
-            T Value;
-            std::shared_ptr<Node> Next { nullptr };
-            std::shared_ptr<Node> Prev { nullptr };
-            Node (T _value, std::shared_ptr<Node> _next, std::shared_ptr<Node> _prev)
-                : Value(_value), Next(_next), Prev(_prev) {}
-        };
-
-        std::shared_ptr<Node> m_front { nullptr };      ///< Pointer to the front item
-        std::shared_ptr<Node> m_back { nullptr };       ///< Pointer to the back item
-        size_t m_size { 0 };                            ///< Container size
+        const_reference back() const;
     };
 }
 
 template<typename T>
-CppADS::Deque<T>::Deque(const Deque<T>& copy)
-{
-    std::shared_ptr<Node> src = copy.m_front;
-    while(src != nullptr)
-    {
-        push_back(src->Value);
-        src = src->Next;
-    }
-}
+CppADS::Deque<T>::Deque(const Deque<T>& copy) : List<T>(copy) {}
 
 template<typename T>
-CppADS::Deque<T>::Deque(Deque<T>&& move)
-{
-    m_size = std::move(move.m_size);
-    m_front = std::move(move.m_front);
-    m_back = std::move(move.m_back);
-    move.m_size = 0;
-}
+CppADS::Deque<T>::Deque(Deque<T>&& move) : List<T>(std::move(move)) {}
 
 template<typename T>
-CppADS::Deque<T>::Deque(std::initializer_list<T> init_list)
-{
-    for (auto it = init_list.begin(); it != init_list.end(); ++it)
-    {
-        push_back(*it);
-    }
-}
+CppADS::Deque<T>::Deque(std::initializer_list<T> init_list) : List<T>(init_list) {}
 
 template<typename T>
 CppADS::Deque<T>& CppADS::Deque<T>::operator=(const Deque<T>& copy)
 {
-    clear();
-    std::shared_ptr<Node> src = copy.m_front;
-    while(src != nullptr)
-    {
-        push_back(src->Value);
-        src = src->Next;
-    }
+    List<T>::operator=(copy);
     return *this;
 }
 
 template<typename T>
 CppADS::Deque<T>& CppADS::Deque<T>::operator=(Deque<T>&& move)
 {
-    clear();
-    m_size = std::move(move.m_size);
-    m_front = std::move(move.m_front);
-    m_back = std::move(move.m_back);
-    move.m_size = 0;
+    List<T>::operator=(std::move(move));
     return *this;
 }
 
 template<typename T>
 void CppADS::Deque<T>::push_back(const T& value)
 {
-    if (m_back != nullptr)
-    {
-        std::shared_ptr<Node> new_node = std::make_shared<Node>(value, nullptr, m_back);
-        m_back->Next = new_node;
-        m_back = new_node;
-    }
-    else
-    {
-        m_back = m_front = std::make_shared<Node>(value, nullptr, nullptr);
-    }
-    m_size++;
+    List<T>::push_back(value);
 }
 
 template<typename T>
 void CppADS::Deque<T>::push_back(T&& value)
 {
-    if (m_back != nullptr)
-    {
-        std::shared_ptr<Node> new_node = std::make_shared<Node>(std::move(value), nullptr, m_back);
-        m_back->Next = new_node;
-        m_back = new_node;
-    }
-    else
-    {
-        m_back = m_front = std::make_shared<Node>(std::move(value), nullptr, nullptr);
-    }
-    m_size++;
+    List<T>::push_back(std::move(value));
 }
 
 template<typename T>
 void CppADS::Deque<T>::push_front(const T& value)
 {
 
-    if (m_front != nullptr)
-    {
-        std::shared_ptr<Node> new_node = std::make_shared<Node>(value, m_front, nullptr);
-        m_front->Prev = new_node;
-        m_front = new_node;
-    }
-    else
-    {
-        m_back = m_front = std::make_shared<Node>(value, nullptr, nullptr);
-    }
-    m_size++;
+    List<T>::push_front(value);
 }
 
 template<typename T>
 void CppADS::Deque<T>::push_front(T&& value)
 {
-    if (m_front != nullptr)
-    {
-        std::shared_ptr<Node> new_node = std::make_shared<Node>(std::move(value), m_front, nullptr);
-        m_front->Prev = new_node;
-        m_front = new_node;
-    }
-    else
-    {
-        m_back = m_front = std::make_shared<Node>(std::move(value), nullptr, nullptr);
-    }
-    m_size++;
+    List<T>::push_front(std::move(value));
 }
 
 template<typename T>
 void CppADS::Deque<T>::pop_back()
 {
-    if(m_back != nullptr)
-    {
-        m_back = m_back->Prev;
-        if (m_back == nullptr)
-        {
-            m_front = nullptr;
-        }
-        else
-        {
-            m_back->Next = nullptr;
-        }
-        m_size--;
-    }
+    List<T>::pop_back();
 }
 
 template<typename T>
 void CppADS::Deque<T>::pop_front()
 {
-    if(m_front != nullptr)
-    {
-        m_front = m_front->Next;
-        if (m_front == nullptr)
-        {
-            m_back = nullptr;
-        }
-        else
-        {
-            m_front->Prev = nullptr;
-        }
-        m_size--;
-    }
+    List<T>::pop_front();
 }
 
 template<typename T>
-T& CppADS::Deque<T>::front()
+typename CppADS::Deque<T>::reference CppADS::Deque<T>::front()
 {
-    if(m_front != nullptr)
-    {
-        return m_front->Value;
-    }
-    else
-    {
-        throw std::out_of_range("CppADS::Deque<T>::front: deque is empty");
-    }
+    return List<T>::front();
 }
 
 template<typename T>
-const T& CppADS::Deque<T>::front() const
+typename CppADS::Deque<T>::const_reference CppADS::Deque<T>::front() const
 {
-    if(m_front != nullptr)
-    {
-        return m_front->Value;
-    }
-    else
-    {
-        throw std::out_of_range("CppADS::Deque<T>::front: deque is empty");
-    }
+    return List<T>::front();
 }
 
 template<typename T>
-T& CppADS::Deque<T>::back()
+typename CppADS::Deque<T>::reference CppADS::Deque<T>::back()
 {
-    if(m_back != nullptr)
-    {
-        return m_back->Value;
-    }
-    else
-    {
-        throw std::out_of_range("CppADS::Deque<T>::back: deque is empty");
-    }
+    return List<T>::back();
 }
 
 template<typename T>
-const T& CppADS::Deque<T>::back() const
+typename CppADS::Deque<T>::const_reference CppADS::Deque<T>::back() const
 {
-    if(m_back != nullptr)
-    {
-        return m_back->Value;
-    }
-    else
-    {
-        throw std::out_of_range("CppADS::Deque<T>::back: deque is empty");
-    }
+    return List<T>::back();
 }
 
 template<typename T>
 size_t CppADS::Deque<T>::size() const
 {
-    return m_size;
+    return List<T>::size();
 }
 
 template<typename T>
 void CppADS::Deque<T>::clear()
 {
-    while(m_front != nullptr)
-        pop_front();
+    List<T>::clear();
 }
 
 #endif //DEQUE_HPP

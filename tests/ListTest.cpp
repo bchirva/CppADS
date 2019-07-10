@@ -3,7 +3,6 @@
 #include "List.hpp"
 using CppADS::List;
 
-
 TEST(ListTest, ConstructTest)
 {
     List<int> list_empty;
@@ -76,7 +75,7 @@ TEST(ListTest, AssignTest)
 
 TEST(ListTest, AccessTest)
 {
-    List<int> list { 0, 1, 2, 3, 4, 5, 6, 7, 8, 9 };
+    List<int> list { 42, 1, 2, 3, 4, 5, 6, 7, 8, 69 };
 
     try {
         const int var = list[66];
@@ -88,6 +87,8 @@ TEST(ListTest, AccessTest)
     list[5] = 50;
     int var = list[5];
     ASSERT_EQ(var, 50);
+    ASSERT_EQ(list.front(), 42);
+    ASSERT_EQ(list.back(), 69);
 }
 
 TEST(ListTest, InsertTest)

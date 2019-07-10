@@ -80,12 +80,17 @@ namespace CppADS
         /// @brief Access to item
         /// @param index item position
         /// @return reference to value
-        T& operator[](size_t index);
+        reference operator[](size_t index);
 
         /// @brief Access to item
         /// @param index item position
         /// @return reference to value
-        const T& operator[](size_t index) const;
+        const_reference operator[](size_t index) const;
+
+        reference front();
+        const_reference front() const;
+        reference back();
+        const_reference back() const;
 
         /// @brief Search for first item equal value
         /// @param value value search for
@@ -406,7 +411,7 @@ typename CppADS::List<T>::const_iterator CppADS::List<T>::find(const T& value) c
 }
 
 template<typename T>
-T& CppADS::List<T>::operator[](size_t index)
+typename CppADS::List<T>::reference CppADS::List<T>::operator[](size_t index)
 {
     if (index >= m_size)
         throw std::out_of_range("CppADS::List<T>::operator[]: index is out of range");
@@ -420,7 +425,7 @@ T& CppADS::List<T>::operator[](size_t index)
 }
 
 template<typename T>
-const T& CppADS::List<T>::operator[](size_t index) const
+typename CppADS::List<T>::const_reference CppADS::List<T>::operator[](size_t index) const
 {
     if (index >= m_size)
         throw std::out_of_range("CppADS::List<T>::operator[]: index is out of range");
@@ -431,6 +436,30 @@ const T& CppADS::List<T>::operator[](size_t index) const
         it++;
     }
     return *it;
+}
+
+template<typename T>
+typename CppADS::List<T>::reference CppADS::List<T>:: front()
+{
+    return *(begin());
+}
+
+template<typename T>
+typename CppADS::List<T>::const_reference CppADS::List<T>:: front() const
+{
+    return *(cbegin());
+}
+
+template<typename T>
+typename CppADS::List<T>::reference CppADS::List<T>:: back()
+{
+    return *(end()--);
+}
+
+template<typename T>
+typename CppADS::List<T>::const_reference CppADS::List<T>:: back() const
+{
+    return *(cend()--);
 }
 
 template<class T>

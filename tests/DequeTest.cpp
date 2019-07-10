@@ -1,7 +1,6 @@
 #include <gtest/gtest.h>
 
 #include <Deque.hpp>
-
 using CppADS::Deque;
 
 TEST(DequeTest, ConstructDequeTest)
