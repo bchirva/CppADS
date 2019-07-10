@@ -1,13 +1,13 @@
 #ifndef STACK_H
 #define STACK_H
 
-#include "Array.hpp"
+#include "ForwardList.hpp"
 
 namespace CppADS
 {
     template<class T>
     /// @brief Stack (LIFO) class
-    class Stack : private Array<T>
+    class Stack : private ForwardList<T>
     {
     public:
         using value_type = T;
@@ -15,9 +15,6 @@ namespace CppADS
         using const_reference = const T&;
         using pointer = T*;
         using const_pointer = const T*;
-
-        class iterator;
-        class const_iterator;
 
         Stack() = default;                          ///< Default constructor
         Stack(const Stack<T>& copy);                ///< Copy contructor
@@ -45,181 +42,78 @@ namespace CppADS
 
         /// @brief Get last inserted value
         /// @return value on top of the stack
-        T& top();
+        reference top();
 
         /// @brief Overloaded method
-        const T& top() const;
+        const_reference top() const;
 
         /// @brief Remove top item
         void pop();
-
-        iterator begin() {
-            return iterator(Array<T>::rbegin());
-        }
-        const_iterator begin() const {
-            return const_iterator(Array<T>::rbegin());
-        }
-        const_iterator cbegin() const {
-            return const_iterator(Array<T>::crbegin());
-        }
-        iterator end() {
-            return iterator(Array<T>::rend());
-        }
-        const_iterator end() const {
-            return const_iterator(Array<T>::rend());
-        }
-        const_iterator cend() const {
-            return const_iterator(Array<T>::crend());
-        }
-    };
-
-    template<typename T>
-    class Stack<T>::iterator : public std::iterator<std::forward_iterator_tag, T>
-    {
-    private:
-        typename Array<T>::reverse_iterator it { nullptr };
-
-    public:
-        iterator(typename Array<T>::reverse_iterator src_it = nullptr) : it(src_it) {}
-        ~iterator() = default;
-
-        Stack<T>::reference operator*() {
-            return *it;
-        }
-        Stack<T>::pointer operator->() {
-            return it.operator->();
-        }
-
-        iterator& operator++() {
-            it++;
-            return *this;
-        }
-        iterator& operator--() {
-            it--;;
-            return *this;
-        }
-        iterator& operator++(int) {
-            it++;
-            return *this;
-        }
-        iterator& operator--(int) {
-            it--;;
-            return *this;
-        }
-
-        bool operator==(const iterator& rhs) const {
-            return it == rhs.it;
-        }
-        bool operator!=(const iterator& rhs) const {
-            return it != rhs.it;
-        }
-    };
-
-    template<typename T>
-    class Stack<T>::const_iterator : public std::iterator<std::forward_iterator_tag, T>
-    {
-    private:
-        typename Array<T>::reverse_iterator it;
-
-    public:
-        const_iterator(typename Array<T>::reverse_iterator src_it = nullptr) : it(src_it) {}
-        ~const_iterator() = default;
-
-        Stack<T>::const_reference operator*() {
-            return *it;
-        }
-        Stack<T>::const_pointer operator->() {
-            return it.operator->();
-        }
-
-        const_iterator& operator++() {
-            it++;
-            return *this;
-        }
-        const_iterator& operator--() {
-            it--;;
-            return *this;
-        }
-        const_iterator& operator++(int) {
-            it++;
-            return *this;
-        }
-        const_iterator& operator--(int) {
-            it--;;
-            return *this;
-        }
-
-        bool operator==(const const_iterator& rhs) const {
-            return it == rhs.it;
-        }
-        bool operator!=(const const_iterator& rhs) const {
-            return it != rhs.it;
-        }
     };
 }
 
 template<class T>
-CppADS::Stack<T>::Stack(const Stack<T>& copy) : Array<T>(copy) {}
+CppADS::Stack<T>::Stack(const Stack<T>& copy) : ForwardList<T>(copy) {}
 
 template<class T>
-CppADS::Stack<T>::Stack(Stack<T>&& move) : Array<T>(std::move(move)) {}
+CppADS::Stack<T>::Stack(Stack<T>&& move) : ForwardList<T>(std::move(move)) {}
 
 template<class T>
-CppADS::Stack<T>::Stack(std::initializer_list<T> init_list) : Array<T>(init_list) {}
+CppADS::Stack<T>::Stack(std::initializer_list<T> init_list) : ForwardList<T>(init_list) {}
 
 template<class T>
 CppADS::Stack<T>& CppADS::Stack<T>::operator=(const Stack<T>& copy)
 {
-    Array<T>::operator=(copy);
+    ForwardList<T>::operator=(copy);
     return *this;
 }
 
 template<class T>
 CppADS::Stack<T>& CppADS::Stack<T>::operator=(Stack<T>&& move)
 {
-    Array<T>::operator=(std::move(move));
+    ForwardList<T>::operator=(std::move(move));
     return *this;
 }
 
 template<class T>
 void CppADS::Stack<T>::clear()
 {
-    Array<T>::clear();
+    ForwardList<T>::clear();
 }
 
 template<class T>
 size_t CppADS::Stack<T>::size() const
 {
-    return Array<T>::size();
+    return ForwardList<T>::size();
 }
 
 template<class T>
 void CppADS::Stack<T>::push(const T& value)
 {
-    Array<T>::insert(value, Array<T>::end());
+    ForwardList<T>::push_front(value);
 }
 
 template<class T>
 void CppADS::Stack<T>::push(T&& value)
 {
-    Array<T>::insert(value, Array<T>::end());
+    ForwardList<T>::push_front(std::move(value));
 }
 
 template<class T>
-T& CppADS::Stack<T>::top()
+typename CppADS::Stack<T>::reference CppADS::Stack<T>::top()
 {
-    return Array<T>::operator[](Array<T>::size() - 1);
+    return ForwardList<T>::front();
 }
 
 template<class T>
-const T& CppADS::Stack<T>::top() const
+typename CppADS::Stack<T>::const_reference CppADS::Stack<T>::top() const
 {
-    return Array<T>::operator[](Array<T>::size() - 1);
+    return ForwardList<T>::front();
 }
 
 template<class T>
 void CppADS::Stack<T>::pop()
 {
-    Array<T>::remove(Array<T>::end());
+    ForwardList<T>::pop_front();
 }
 #endif //STACK_H

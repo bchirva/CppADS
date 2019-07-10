@@ -51,21 +51,6 @@ TEST(StackTest, AssignTest)
     ASSERT_EQ(stack_move.size(), 0);
 }
 
-TEST(StackTest, IteratorTest)
-{
-    Stack<int> it_stack;
-    for (int i = 0; i < 32; i++)
-        it_stack.push(i);
-
-    Stack<int> compare_stack(it_stack);
-
-    for (auto it = it_stack.begin(); it != it_stack.end(); it++)
-    {
-        ASSERT_EQ(*it, compare_stack.top());
-        compare_stack.pop();
-    }
-}
-
 TEST(StackTest, ModifyTest)
 {
     Stack<int> stack;
