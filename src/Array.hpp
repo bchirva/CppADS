@@ -109,49 +109,28 @@ namespace CppADS
         /// @return iterator to found item (end if item not found)
         const_iterator find(const T& value) const;
 
+        bool operator==(const Array<T>& rhs) const;
+        bool operator!=(const Array<T>& rhs) const;
+
         /// @brief Set function for reserved size calculation
         /// @param func function
         void setReserveFunc(std::function<size_t(size_t)>&& func);
 
-        iterator begin() {
-            return iterator(m_data.get());
-        };
-        const_iterator begin() const {
-            return const_iterator(m_data.get());
-        };
-        const_iterator cbegin() const {
-            return const_iterator(m_data.get());
-        };
-        iterator end() {
-            return iterator(m_data.get() + m_size);
-        };
-        const_iterator end() const {
-            return const_iterator(m_data.get() + m_size);
-        };
-        const_iterator cend() const {
-            return const_iterator(m_data.get() + m_size);
-        };
-        reverse_iterator rbegin() {
-            return std::reverse_iterator<iterator>(m_data.get() + m_size);
-        };
-        const_reverse_iterator rbegin() const {
-            return std::reverse_iterator<const_iterator>(m_data.get() + m_size);
-        };
-        const_reverse_iterator crbegin() const {
-            return std::reverse_iterator<const_iterator>(m_data.get() + m_size);
-        };
-        reverse_iterator rend() {
-            return std::reverse_iterator<iterator>(m_data.get());
-        };
-        const_reverse_iterator rend() const {
-            return std::reverse_iterator<const_iterator>(m_data.get());
-        };
-        const_reverse_iterator crend() const {
-            return std::reverse_iterator<const_iterator>(m_data.get());
-        };
+        iterator begin();
+        const_iterator begin() const;
+        const_iterator cbegin() const;
 
-        bool operator==(const Array<T>& rhs) const;
-        bool operator!=(const Array<T>& rhs) const;
+        iterator end();
+        const_iterator end() const;
+        const_iterator cend() const;
+
+        reverse_iterator rbegin();
+        const_reverse_iterator rbegin() const;
+        const_reverse_iterator crbegin() const;
+
+        reverse_iterator rend();
+        const_reverse_iterator rend() const;
+        const_reverse_iterator crend() const;
 
     private:
         std::unique_ptr<T[]> m_data { nullptr };      ///< Pointer to the data head on heap
@@ -708,5 +687,65 @@ bool CppADS::Array<T>::operator!=(const Array<T>& rhs) const
 {
     return !(*this == rhs);
 }
+
+template<typename T>
+typename CppADS::Array<T>::iterator CppADS::Array<T>::begin() {
+    return iterator(m_data.get());
+};
+
+template<typename T>
+typename CppADS::Array<T>::const_iterator CppADS::Array<T>::begin() const {
+    return const_iterator(m_data.get());
+};
+
+template<typename T>
+typename CppADS::Array<T>::const_iterator CppADS::Array<T>::cbegin() const {
+    return const_iterator(m_data.get());
+};
+
+template<typename T>
+typename CppADS::Array<T>::iterator CppADS::Array<T>::end() {
+    return iterator(m_data.get() + m_size);
+};
+
+template<typename T>
+typename CppADS::Array<T>::const_iterator CppADS::Array<T>::end() const {
+    return const_iterator(m_data.get() + m_size);
+};
+
+template<typename T>
+typename CppADS::Array<T>::const_iterator CppADS::Array<T>::cend() const {
+    return const_iterator(m_data.get() + m_size);
+};
+
+template<typename T>
+typename CppADS::Array<T>::reverse_iterator CppADS::Array<T>::rbegin() {
+    return std::reverse_iterator<iterator>(m_data.get() + m_size);
+};
+
+template<typename T>
+typename CppADS::Array<T>::const_reverse_iterator CppADS::Array<T>::rbegin() const {
+    return std::reverse_iterator<const_iterator>(m_data.get() + m_size);
+};
+
+template<typename T>
+typename CppADS::Array<T>::const_reverse_iterator CppADS::Array<T>::crbegin() const {
+    return std::reverse_iterator<const_iterator>(m_data.get() + m_size);
+};
+
+template<typename T>
+typename CppADS::Array<T>::reverse_iterator CppADS::Array<T>::rend() {
+    return std::reverse_iterator<iterator>(m_data.get());
+};
+
+template<typename T>
+typename CppADS::Array<T>::const_reverse_iterator CppADS::Array<T>::rend() const {
+    return std::reverse_iterator<const_iterator>(m_data.get());
+};
+
+template<typename T>
+typename CppADS::Array<T>::const_reverse_iterator CppADS::Array<T>::crend() const {
+    return std::reverse_iterator<const_iterator>(m_data.get());
+};
 
 #endif //ARRAY_H

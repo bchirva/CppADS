@@ -100,36 +100,20 @@ namespace CppADS
         /// @return iterator to found item (end if item not found)
         const_iterator find(const T& value) const;
 
-        iterator begin() {
-            return iterator(m_head->next.get());
-        }
-        const_iterator begin() const {
-            return const_iterator(m_head->next.get());
-        }
-        const_iterator cbegin() const {
-            return const_iterator(m_head->next.get());
-        }
-        iterator before_begin() {
-            return iterator(m_head.get());
-        }
-        const_iterator before_begin() const {
-            return const_iterator(m_head.get());
-        }
-        const_iterator cbefore_begin() const {
-            return const_iterator(m_head.get());
-        }
-        iterator end() {
-            return iterator(nullptr);
-        }
-        const_iterator end() const {
-            return const_iterator(nullptr);
-        }
-        const_iterator cend() const {
-            return const_iterator(nullptr);
-        }
-
         bool operator==(const ForwardList<T>& rhs) const;
         bool operator!=(const ForwardList<T>& rhs) const;
+
+        iterator begin();
+        const_iterator begin() const;
+        const_iterator cbegin() const;
+
+        iterator before_begin();
+        const_iterator before_begin() const;
+        const_iterator cbefore_begin() const;
+
+        iterator end();
+        const_iterator end() const;
+        const_iterator cend() const;
 
     private:
         struct Node;
@@ -437,6 +421,51 @@ template<typename T>
 bool CppADS::ForwardList<T>::operator!=(const ForwardList<T>& rhs) const
 {
     return !(*this == rhs);
+}
+
+template<typename T>
+typename CppADS::ForwardList<T>::iterator CppADS::ForwardList<T>::begin() {
+    return iterator(m_head->next.get());
+}
+
+template<typename T>
+typename CppADS::ForwardList<T>::const_iterator CppADS::ForwardList<T>::begin() const {
+    return const_iterator(m_head->next.get());
+}
+
+template<typename T>
+typename CppADS::ForwardList<T>::const_iterator CppADS::ForwardList<T>::cbegin() const {
+    return const_iterator(m_head->next.get());
+}
+
+template<typename T>
+typename CppADS::ForwardList<T>::iterator CppADS::ForwardList<T>::before_begin() {
+    return iterator(m_head.get());
+}
+
+template<typename T>
+typename CppADS::ForwardList<T>::const_iterator CppADS::ForwardList<T>::before_begin() const {
+    return const_iterator(m_head.get());
+}
+
+template<typename T>
+typename CppADS::ForwardList<T>::const_iterator CppADS::ForwardList<T>::cbefore_begin() const {
+    return const_iterator(m_head.get());
+}
+
+template<typename T>
+typename CppADS::ForwardList<T>::iterator CppADS::ForwardList<T>::end() {
+    return iterator(nullptr);
+}
+
+template<typename T>
+typename CppADS::ForwardList<T>::const_iterator CppADS::ForwardList<T>::end() const {
+    return const_iterator(nullptr);
+}
+
+template<typename T>
+typename CppADS::ForwardList<T>::const_iterator CppADS::ForwardList<T>::cend() const {
+    return const_iterator(nullptr);
 }
 
 #endif //DOUBLEForwardList_H

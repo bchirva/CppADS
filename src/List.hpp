@@ -102,45 +102,24 @@ namespace CppADS
         /// @return iterator to found item (end if item not found)
         const_iterator find(const T& value) const;
 
-        iterator begin() {
-            return iterator(m_sentinel->next.get());
-        }
-        const_iterator begin() const {
-            return const_iterator(m_sentinel->next.get());
-        }
-        const_iterator cbegin() const {
-            return const_iterator(m_sentinel->next.get());
-        }
-        iterator end() {
-            return iterator(m_sentinel.get());
-        }
-        const_iterator end() const {
-            return const_iterator(m_sentinel.get());
-        }
-        const_iterator cend() const {
-            return const_iterator(m_sentinel.get());
-        }
-        reverse_iterator rbegin() {
-            return std::reverse_iterator<iterator>();
-        };
-        const_reverse_iterator rbegin() const {
-            return std::reverse_iterator<const_iterator>();
-        };
-        const_reverse_iterator crbegin() const {
-            return std::reverse_iterator<const_iterator>();
-        };
-        reverse_iterator rend() {
-            return std::reverse_iterator<iterator>();
-        };
-        const_reverse_iterator rend() const {
-            return std::reverse_iterator<const_iterator>();
-        };
-        const_reverse_iterator crend() const {
-            return std::reverse_iterator<const_iterator>();
-        };
-
         bool operator==(const List<T>& rhs) const;
         bool operator!=(const List<T>& rhs) const;
+
+        iterator begin();
+        const_iterator begin() const;
+        const_iterator cbegin() const;
+
+        iterator end();
+        const_iterator end() const;
+        const_iterator cend() const;
+
+        reverse_iterator rbegin();
+        const_reverse_iterator rbegin() const;
+        const_reverse_iterator crbegin() const;
+
+        reverse_iterator rend();
+        const_reverse_iterator rend() const;
+        const_reverse_iterator crend() const;
 
     private:
         struct Node;
@@ -487,5 +466,64 @@ bool CppADS::List<T>::operator!=(const List<T>& rhs) const
     return !(*this == rhs);
 }
 
+template<class T>
+typename CppADS::List<T>::iterator CppADS::List<T>::begin() {
+    return iterator(m_sentinel->next.get());
+}
+
+template<class T>
+typename CppADS::List<T>::const_iterator CppADS::List<T>::begin() const {
+    return const_iterator(m_sentinel->next.get());
+}
+
+template<class T>
+typename CppADS::List<T>::const_iterator CppADS::List<T>::cbegin() const {
+    return const_iterator(m_sentinel->next.get());
+}
+
+template<class T>
+typename CppADS::List<T>::iterator CppADS::List<T>::end() {
+    return iterator(m_sentinel.get());
+}
+
+template<class T>
+typename CppADS::List<T>::const_iterator CppADS::List<T>::end() const {
+    return const_iterator(m_sentinel.get());
+}
+
+template<class T>
+typename CppADS::List<T>::const_iterator CppADS::List<T>::cend() const {
+    return const_iterator(m_sentinel.get());
+}
+
+template<class T>
+typename CppADS::List<T>::reverse_iterator CppADS::List<T>::rbegin() {
+    return std::reverse_iterator<iterator>();
+}
+
+template<class T>
+typename CppADS::List<T>::const_reverse_iterator CppADS::List<T>::rbegin() const {
+    return std::reverse_iterator<const_iterator>();
+}
+
+template<class T>
+typename CppADS::List<T>::const_reverse_iterator CppADS::List<T>::crbegin() const {
+    return std::reverse_iterator<const_iterator>();
+}
+
+template<class T>
+typename CppADS::List<T>::reverse_iterator CppADS::List<T>::rend() {
+    return std::reverse_iterator<iterator>();
+}
+
+template<class T>
+typename CppADS::List<T>::const_reverse_iterator CppADS::List<T>::rend() const {
+    return std::reverse_iterator<const_iterator>();
+}
+
+template<class T>
+typename CppADS::List<T>::const_reverse_iterator CppADS::List<T>::crend() const {
+    return std::reverse_iterator<const_iterator>();
+}
 
 #endif //DOUBLEList_H
