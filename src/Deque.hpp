@@ -7,7 +7,7 @@ namespace CppADS
 {
     template<typename T>
     /// @brief Double-endian queue class
-    class Deque : public List<T>
+    class Deque : private List<T>
     {
     public:
         using value_type = T;
@@ -26,12 +26,19 @@ namespace CppADS
 
         ~Deque() = default;                         ///< Destructor
 
-        /// @brief Remove all data from container
-        void clear() override;
+        /// @name Capacity
+        /// @{
 
         /// @brief Get size of container
         /// @return element's count
         size_t size() const override;
+
+        /// @}
+        /// @name Modifiers
+        /// @{
+
+        /// @brief Remove all data from container
+        void clear() override;
 
         /// @brief Insert element to the end
         /// @param value inserted item
@@ -53,6 +60,10 @@ namespace CppADS
         /// @brief Remove first element
         void pop_front();
 
+        ///@}
+        /// @name Accesors
+        /// @{
+
         /// @brief Access to the first element
         /// @return Reference to the first element
         reference front();
@@ -68,6 +79,8 @@ namespace CppADS
         /// @brief Access to the last element
         /// @return Reference to the last element
         const_reference back() const;
+
+        ///@}
     };
 }
 

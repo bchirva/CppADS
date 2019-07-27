@@ -8,8 +8,9 @@
 
 namespace CppADS
 {
-    template <class T>
     /// @brief Singly linked list
+    /// @tparam T value type stored in the container
+    template <class T>
     class ForwardList : public IContainer
     {
     public:
@@ -22,41 +23,46 @@ namespace CppADS
         class iterator;
         class const_iterator;
 
-        ForwardList() = default;                                  ///< Default constructor
-        ForwardList(const ForwardList<T>& copy);                  ///< Copy contructor
-        ForwardList(ForwardList<T>&& move);                       ///< Move contructor
-        ForwardList(std::initializer_list<T> init_ForwardList);   ///< Contructor from initializer ForwardList
+        ForwardList() = default;                                ///< Default constructor
+        ForwardList(const ForwardList<T>& copy);                ///< Copy contructor
+        ForwardList(ForwardList<T>&& move);                     ///< Move contructor
+        ForwardList(std::initializer_list<T> init_list);        ///< Contructor from initializer ForwardList
 
-        ForwardList& operator=(const ForwardList<T>& copy);       ///< Copy assignment operator
-        ForwardList& operator=(ForwardList<T>&& move);            ///< Move assignment operator
+        ForwardList& operator=(const ForwardList<T>& copy);     ///< Copy assignment operator
+        ForwardList& operator=(ForwardList<T>&& move);          ///< Move assignment operator
 
-        ~ForwardList() = default;                                 ///< Destructor
+        ~ForwardList() = default;                               ///< Destructor
 
-        /// @brief Remove all data from container
-        void clear() override;
+        /// @name Capacity
+        /// @{
 
         /// @brief Get size of container
         /// @return element's count
         size_t size() const override;
 
+        /// @}
+        /// @name Modifiers
+        /// @{
+
+        /// @brief Remove all data from container
+        void clear() override;
+
         /// @brief Insert value to container
         /// @param value inserted value
         /// @param iterator position to insert
         void insert_after(const T& value, iterator position);
-
         /// @brief Insert value to container
         /// @param value inserted value
         /// @param iterator position to insert
         void insert_after(T&& value, iterator position);
 
         /// @brief Remove values from container
-        /// @param iterator position of item to delet
+        /// @param iterator position of item to delete
         void remove_after(iterator position);
 
         /// @brief Add value to the tail of list
         /// @param value - added value
         void push_back(const T& value);
-
         /// @brief Add value to the tail of list
         /// @param value - added value
         void push_back(T&& value);
@@ -64,7 +70,6 @@ namespace CppADS
         /// @brief Add value to the head of list
         /// @param value - added value
         void push_front(const T& value);
-
         /// @brief Add value to the head of list
         /// @param value - added value
         void push_front(T&& value);
@@ -72,78 +77,99 @@ namespace CppADS
         /// @brief Remove first value of the list
         void pop_front();
 
+        ///@}
+        /// @name Accesors
+        /// @{
+
         /// @brief Access to item
         /// @param index item position
         /// @return reference to value
         reference operator[](size_t index);
-
         /// @brief Access to item
         /// @param index item position
-        /// @return reference to value
+        /// @return const reference to value
         const_reference operator[](size_t index) const;
 
         /// @brief Access to the first item in list
-        /// @return const reference on first value
+        /// @return reference on first value
         reference front();
-
         /// @brief Access to the first item in list
         /// @return const reference on first value
         const_reference front() const;
 
         /// @brief Search for first item equal value
         /// @param value value search for
-        /// @return iterator to found item (end if item not found)
+        /// @return read-write iterator to found item (end if item not found)
         iterator find(const T& value);
-
         /// @brief Search for first item equal value
         /// @param value value search for
-        /// @return iterator to found item (end if item not found)
+        /// @return read-only iterator to found item (end if item not found)
         const_iterator find(const T& value) const;
+        /// @}
 
+        /// @brief Comparing two containers
+        /// @return True if they equeal, othervise - false
         bool operator==(const ForwardList<T>& rhs) const;
+        /// @brief Comparing two containers
+        /// @return False if they equeal, othervise - true
         bool operator!=(const ForwardList<T>& rhs) const;
 
+        /// @name Iterators
+        /// @{
+
+        /// @return read-write iterator to the first element of the container
         iterator begin();
+        /// @return read-only iterator to the first element of the container
         const_iterator begin() const;
+        /// @return read-only iterator to the first element of the container
         const_iterator cbegin() const;
 
+        /// @return read-write iterator to the element before the first element of the container
         iterator before_begin();
+        /// @return read-only iterator to the element before the first element of the container
         const_iterator before_begin() const;
+        /// @return read-only iterator to the element before the first element of the container
         const_iterator cbefore_begin() const;
 
+        /// @return read-write iterator to the element after the last element of the container
         iterator end();
+        /// @return read-only iterator to the element after the last element of the container
         const_iterator end() const;
+        /// @return read-only iterator to the element after the last element of the container
         const_iterator cend() const;
+        /// @}
 
     private:
         struct Node;
 
-        std::unique_ptr<Node> m_head = std::make_unique<Node>(nullptr, nullptr);
-        Node* m_tail = m_head.get();
-        size_t m_size { 0 };
+        std::unique_ptr<Node> m_head = std::make_unique<Node>(nullptr, nullptr);    ///< Head of the list
+        Node* m_tail = m_head.get();                                                ///< Pointer to the last element
+        size_t m_size { 0 };                                                        ///< Count of elements
     };
 
     template<class T>
+    /// @brief Struct representing ForwardList's cell
     struct ForwardList<T>::Node
     {
-        std::unique_ptr<T> value { nullptr };
-        std::unique_ptr<Node> next { nullptr };
+        std::unique_ptr<T> value { nullptr };           ///< Value of the cell          @private
+        std::unique_ptr<Node> next { nullptr };         ///< Pointer to the next cell   @private
 
         Node(std::unique_ptr<T> _value, std::unique_ptr<Node> _next)
-            : value(std::move(_value)), next(std::move(_next)) {}
+            : value(std::move(_value)), next(std::move(_next)) {}               ///< @private
         Node(T _value, std::unique_ptr<Node> _next)
-            : value(std::make_unique<T>(_value)), next(std::move(_next)) {}
+            : value(std::make_unique<T>(_value)), next(std::move(_next)) {}     ///< @private
     };
 
     template<class T>
+    /// @brief Read-write iterator for ForwardList container
     class ForwardList<T>::iterator : public std::iterator<std::forward_iterator_tag, T>
     {
     private:
-        ForwardList<T>::Node* m_ptr { nullptr };
+        ForwardList<T>::Node* m_ptr { nullptr };            ///< @private
         friend class ForwardList;
 
     public:
-        iterator(Node* _ptr = nullptr) : m_ptr(_ptr) {};
+        iterator(Node* _ptr = nullptr) : m_ptr(_ptr) {};    ///< @private
         ~iterator() {m_ptr = nullptr;}
 
         ForwardList<T>::reference operator*() {
@@ -173,14 +199,15 @@ namespace CppADS
     };
 
     template<class T>
+    /// @brief Read-only iterator for ForwardList container
     class ForwardList<T>::const_iterator : public std::iterator<std::forward_iterator_tag, T>
     {
     private:
-        ForwardList<T>::Node* m_ptr { nullptr };
+        ForwardList<T>::Node* m_ptr { nullptr };    ///< @private
         friend class ForwardList;
 
     public:
-        const_iterator(Node* _ptr = nullptr) : m_ptr(_ptr) {};
+        const_iterator(Node* _ptr = nullptr) : m_ptr(_ptr) {}; ///< @private
         ~const_iterator() {m_ptr = nullptr;}
 
         ForwardList<T>::const_reference operator*() {

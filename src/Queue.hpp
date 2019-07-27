@@ -6,7 +6,7 @@
 namespace CppADS
 {
     template<class T>
-    /// @brief Queue (FIFO) class
+    /// @brief FIFO data structure class
     class Queue : private ForwardList<T>
     {
     public:
@@ -26,12 +26,19 @@ namespace CppADS
 
         ~Queue() = default;                             ///< Destructor
 
-        /// @brief Remove all data from container
-        void clear() override;
+        /// @name Capacity
+        /// @{
 
         /// @brief Get size of container
         /// @return element's count
         size_t size() const override;
+
+        /// @}
+        /// @name Modifiers
+        /// @{
+
+        /// @brief Remove all data from container
+        void clear() override;
 
         /// @brief Add value to tail of queue
         /// @param value added value
@@ -43,10 +50,18 @@ namespace CppADS
         /// @brief Remove front element
         void dequeue();
 
+        ///@}
+        /// @name Accesors
+        /// @{
+
+        /// @brief Get first inserted value
+        /// @return reference to the first item of the queue
         reference front();
         /// @brief Get first inserted value
-        /// @return value on front of the queue
+        /// @return const reference to the first item of the queue
         const_reference front() const;
+
+        /// @}
     };
 }
 

@@ -34,12 +34,19 @@ namespace CppADS
 
         ~List() = default;                          ///< Destructor
 
-        /// @brief Remove all data from container
-        void clear() override;
+        /// @name Capacity
+        /// @{
 
         /// @brief Get size of container
         /// @return element's count
         size_t size() const override;
+
+        /// @}
+        /// @name Modifiers
+        /// @{
+
+        /// @brief Remove all data from container
+        void clear() override;
 
         /// @brief Insert value to container
         /// @param value inserted value
@@ -77,6 +84,10 @@ namespace CppADS
         /// @brief Remove first value of the list
         void pop_back();
 
+        /// @}
+        /// @name Accesors
+        /// @{
+
         /// @brief Access to item
         /// @param index item position
         /// @return reference to value
@@ -87,9 +98,17 @@ namespace CppADS
         /// @return reference to value
         const_reference operator[](size_t index) const;
 
+        /// @brief Access to the first item in list
+        /// @return reference on first value
         reference front();
+        /// @brief Access to the first item in list
+        /// @return reference on first value
         const_reference front() const;
+        /// @brief Access to the last item in list
+        /// @return const reference on first value
         reference back();
+        /// @brief Access to the last item in list
+        /// @return const reference on last value
         const_reference back() const;
 
         /// @brief Search for first item equal value
@@ -99,27 +118,46 @@ namespace CppADS
 
         /// @brief Search for first item equal value
         /// @param value value search for
-        /// @return iterator to found item (end if item not found)
+        /// @return const iterator to found item (end if item not found)
         const_iterator find(const T& value) const;
+
+        /// @}
 
         bool operator==(const List<T>& rhs) const;
         bool operator!=(const List<T>& rhs) const;
 
+        /// @name Iterators
+        /// @{
+
+        /// @return read-write iterator to the first element of the container
         iterator begin();
+        /// @return read-only iterator to the first element of the container
         const_iterator begin() const;
+        /// @return read-only iterator to the first element of the container
         const_iterator cbegin() const;
 
+        /// @return read-write iterator to the element after the last element of the container
         iterator end();
+        /// @return read-only iterator to the element after the last element of the container
         const_iterator end() const;
+        /// @return read-only iterator to the element after the last element of the container
         const_iterator cend() const;
 
+        /// @return read-write iterator tto the element after the last element of the container
         reverse_iterator rbegin();
+        /// @return read-only iterator to the element after the last element of the container
         const_reverse_iterator rbegin() const;
+        /// @return read-only iterator to the element after the last element of the container
         const_reverse_iterator crbegin() const;
 
+        /// @return read-write iterator to the first element of the container
         reverse_iterator rend();
+        /// @return read-only iterator to the first element of the container
         const_reverse_iterator rend() const;
+        /// @return read-only iterator to the first element of the container
         const_reverse_iterator crend() const;
+
+        /// {@
 
     private:
         struct Node;
@@ -131,12 +169,12 @@ namespace CppADS
     template<class T>
     struct List<T>::Node
     {
-        std::unique_ptr<T> value   { nullptr };
-        std::shared_ptr<Node> next { nullptr };
-        std::shared_ptr<Node> prev { nullptr };
-        Node(std::unique_ptr<T> _value, std::shared_ptr<Node> _next, std::shared_ptr<Node> _prev)
+        std::unique_ptr<T> value   { nullptr };     ///< @private
+        std::shared_ptr<Node> next { nullptr };     ///< @private
+        std::shared_ptr<Node> prev { nullptr };     ///< @private
+        Node(std::unique_ptr<T> _value, std::shared_ptr<Node> _next, std::shared_ptr<Node> _prev)   ///< @private
             : value(std::move(_value)), next(_next), prev(_prev) {}
-        Node(T _value, std::shared_ptr<Node> _next, std::shared_ptr<Node> _prev)
+        Node(T _value, std::shared_ptr<Node> _next, std::shared_ptr<Node> _prev)                    ///< @private
             : value(std::make_unique<T>(_value)), next(_next), prev(_prev) {}
     };
 
@@ -144,11 +182,11 @@ namespace CppADS
     class List<T>::iterator : public std::iterator<std::bidirectional_iterator_tag, T>
     {
     private:
-        List<T>::Node* m_ptr { nullptr };
+        List<T>::Node* m_ptr { nullptr };       ///< @private
         friend class List;
 
     public:
-        iterator(Node* _ptr = nullptr) : m_ptr(_ptr) {};
+        iterator(Node* _ptr = nullptr) : m_ptr(_ptr) {};    ///< @private
         ~iterator() {m_ptr = nullptr;}
 
         List<T>::reference operator*() {
@@ -187,11 +225,11 @@ namespace CppADS
     class List<T>::const_iterator : public std::iterator<std::bidirectional_iterator_tag, T>
     {
     private:
-        List<T>::Node* m_ptr { nullptr };
+        List<T>::Node* m_ptr { nullptr };       ///< @private
         friend class List;
 
     public:
-        const_iterator(Node* _ptr = nullptr) : m_ptr(_ptr) {};
+        const_iterator(Node* _ptr = nullptr) : m_ptr(_ptr) {}; ///< @private
         ~const_iterator() {m_ptr = nullptr;}
 
         List<T>::const_reference operator*() {

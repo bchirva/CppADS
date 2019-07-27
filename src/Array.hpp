@@ -36,8 +36,8 @@ namespace CppADS
 
         ~Array() = default;                         ///< Destructor
 
-        /// @brief Remove all data from container
-        void clear() override;
+        /// @name Capacity
+        /// @{
 
         /// @brief Get size of container
         /// @return element's count
@@ -46,6 +46,13 @@ namespace CppADS
         /// @brief Get reserved size for container's data
         /// @return Current array's capacity
         size_t capacity() const;
+
+        /// @}
+        /// @name Modifiers
+        /// @{
+
+        /// @brief Remove all data from container
+        void clear() override;
 
         /// @brief Insert value to container
         /// @param value inserted value
@@ -67,8 +74,12 @@ namespace CppADS
         /// @param iterator position to insert
         void insert(T&& value, iterator position);
 
+        /// @brief Push value to the back of container
+        /// @param value inserted value
         void push_back(const T& value);
 
+        /// @brief Push value to the back of container
+        /// @param value inserted value
         void push_back(T&& value);
 
         /// @brief Remove values from container
@@ -79,7 +90,12 @@ namespace CppADS
         /// @param iterator position of item to delete
         void remove(iterator position);
 
+        /// @brief Remove last item from container
         void pop_back();
+
+        /// @}
+        /// @name Accesors
+        /// @{
 
         /// @brief Access to item
         /// @param index item position
@@ -91,12 +107,17 @@ namespace CppADS
         /// @return reference to value
         const_reference operator[](size_t index) const;
 
+        /// @brief Access to the last item in list
+        /// @return reference on first value
         reference back();
-
+        /// @brief Access to the last item in list
+        /// @return const reference on first value
         const_reference back() const;
-
+        /// @brief Access to the first item in list
+        /// @return reference on first value
         reference front();
-
+        /// @brief Access to the first item in list
+        /// @return const reference on first value
         const_reference front() const;
 
         /// @brief Search for first item equal value
@@ -109,6 +130,8 @@ namespace CppADS
         /// @return iterator to found item (end if item not found)
         const_iterator find(const T& value) const;
 
+        /// @}
+
         bool operator==(const Array<T>& rhs) const;
         bool operator!=(const Array<T>& rhs) const;
 
@@ -116,21 +139,38 @@ namespace CppADS
         /// @param func function
         void setReserveFunc(std::function<size_t(size_t)>&& func);
 
+        /// @name Iterators
+        /// @{
+
+        /// @return read-write iterator to the first element of the container
         iterator begin();
+        /// @return read-only iterator to the first element of the container
         const_iterator begin() const;
+        /// @return read-only iterator to the first element of the container
         const_iterator cbegin() const;
 
+        /// @return read-write iterator to the element after the last element of the container
         iterator end();
+        /// @return read-only iterator to the element after the last element of the container
         const_iterator end() const;
+        /// @return read-only iterator to the element after the last element of the container
         const_iterator cend() const;
 
+        /// @return read-write iterator tto the element after the last element of the container
         reverse_iterator rbegin();
+        /// @return read-only iterator to the element after the last element of the container
         const_reverse_iterator rbegin() const;
+        /// @return read-only iterator to the element after the last element of the container
         const_reverse_iterator crbegin() const;
 
+        /// @return read-write iterator to the first element of the container
         reverse_iterator rend();
+        /// @return read-only iterator to the first element of the container
         const_reverse_iterator rend() const;
+        /// @return read-only iterator to the first element of the container
         const_reverse_iterator crend() const;
+
+        /// @}
 
     private:
         std::unique_ptr<T[]> m_data { nullptr };      ///< Pointer to the data head on heap
