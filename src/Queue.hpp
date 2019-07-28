@@ -5,8 +5,9 @@
 
 namespace CppADS
 {
-    template<class T>
     /// @brief FIFO data structure class
+    /// @tparam T value type stored in the container
+    template<class T>
     class Queue : private ForwardList<T>
     {
     public:
@@ -44,7 +45,8 @@ namespace CppADS
         /// @param value added value
         void enqueue(const T& value);
 
-        /// @brief Overloaded method
+        /// @brief Add value to tail of queue
+        /// @param value added value
         void enqueue(T&& value);
 
         /// @brief Remove front element

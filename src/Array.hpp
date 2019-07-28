@@ -10,8 +10,9 @@
 
 namespace CppADS
 {
-    template<class T>
     /// @brief Dynamic array class
+    /// @tparam T value type stored in the container
+    template<class T>
     class Array : public IContainer
     {
     public:
@@ -66,12 +67,12 @@ namespace CppADS
 
         /// @brief Insert value to container
         /// @param value inserted value
-        /// @param iterator position to insert
+        /// @param position position to insert
         void insert(const T& value, iterator position);
 
         /// @brief Insert value to container
         /// @param value inserted value
-        /// @param iterator position to insert
+        /// @param position position to insert
         void insert(T&& value, iterator position);
 
         /// @brief Push value to the back of container
@@ -83,11 +84,11 @@ namespace CppADS
         void push_back(T&& value);
 
         /// @brief Remove values from container
-        /// @param iterator position of item to delete
+        /// @param index position of item to delete
         void remove(size_t index);
 
         /// @brief Remove values from container
-        /// @param iterator position of item to delete
+        /// @param position position of item to delete
         void remove(iterator position);
 
         /// @brief Remove last item from container
@@ -191,6 +192,7 @@ namespace CppADS
     };
 
     template<typename T>
+    /// @brief Read-write iterator for Array container
     class Array<T>::iterator : public std::iterator<std::random_access_iterator_tag, T>
     {
     private:
@@ -258,6 +260,7 @@ namespace CppADS
     };
 
     template<typename T>
+    /// @brief Read-only iterator for Array container
     class Array<T>::const_iterator : public std::iterator<std::random_access_iterator_tag, T>
     {
     private:

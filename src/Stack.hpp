@@ -5,8 +5,9 @@
 
 namespace CppADS
 {
-    template<class T>
     /// @brief LIFO data structure class
+    /// @tparam T value type stored in the container
+    template<class T>
     class Stack : private ForwardList<T>
     {
     public:

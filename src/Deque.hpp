@@ -5,8 +5,9 @@
 
 namespace CppADS
 {
-    template<typename T>
     /// @brief Double-endian queue class
+    /// @tparam T value type stored in the container
+    template<typename T>
     class Deque : private List<T>
     {
     public:
@@ -44,7 +45,8 @@ namespace CppADS
         /// @param value inserted item
         void push_back(const T& value);
 
-        /// @brief Overloaded method
+        /// @brief Insert element to the end
+        /// @param value inserted item
         void push_back(T&& value);
 
         /// @brief Insert element to the beginning

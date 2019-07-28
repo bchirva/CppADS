@@ -49,15 +49,15 @@ namespace CppADS
 
         /// @brief Insert value to container
         /// @param value inserted value
-        /// @param iterator position to insert
+        /// @param position position to insert
         void insert_after(const T& value, iterator position);
         /// @brief Insert value to container
         /// @param value inserted value
-        /// @param iterator position to insert
+        /// @param position position to insert
         void insert_after(T&& value, iterator position);
 
         /// @brief Remove values from container
-        /// @param iterator position of item to delete
+        /// @param position position of item to delete
         void remove_after(iterator position);
 
         /// @brief Add value to the tail of list
@@ -147,8 +147,9 @@ namespace CppADS
         size_t m_size { 0 };                                                        ///< Count of elements
     };
 
-    template<class T>
     /// @brief Struct representing ForwardList's cell
+    /// @tparam T value type stored in cell
+    template<class T>
     struct ForwardList<T>::Node
     {
         std::unique_ptr<T> value { nullptr };           ///< Value of the cell          @private

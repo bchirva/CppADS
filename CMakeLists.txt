@@ -1,6 +1,9 @@
 cmake_minimum_required(VERSION 3.10)
 
-project(CppADS)
+project(CppADS
+    VERSION 0.1
+    DESCRIPTION "C++ implementation of algorithms and data structures"
+)
 
 add_library(CppADS INTERFACE)
 add_library(CppADS::CppADS ALIAS CppADS)
@@ -11,5 +14,11 @@ target_include_directories(CppADS INTERFACE
 
 target_compile_features(CppADS INTERFACE cxx_std_14)
 
-enable_testing()
-add_subdirectory(tests)
+if(WITH_TESTS)
+    enable_testing()
+    add_subdirectory(tests)
+endif()
+
+if(WITH_DOCS)
+    add_subdirectory(docs)
+endif()

@@ -8,8 +8,9 @@
 
 namespace CppADS
 {
-    template <class T>
     /// @brief Doubly linked list
+    /// @tparam T value type stored in the container
+    template <class T>
     class List : public IContainer
     {
     public:
@@ -50,16 +51,16 @@ namespace CppADS
 
         /// @brief Insert value to container
         /// @param value inserted value
-        /// @param iterator position to insert
+        /// @param position position to insert
         void insert(const T& value, iterator position);
 
         /// @brief Insert value to container
         /// @param value inserted value
-        /// @param iterator position to insert
+        /// @param position position to insert
         void insert(T&& value, iterator position);
 
         /// @brief Remove values from container
-        /// @param iterator position of item to delet
+        /// @param position position of item to delete
         void remove(iterator position);
 
         /// @brief Add value to the tail of list
@@ -166,6 +167,8 @@ namespace CppADS
         size_t m_size { 0 };
     };
 
+    /// @brief Struct representing List's cell
+    /// @tparam T value type stored in cell
     template<class T>
     struct List<T>::Node
     {
@@ -179,6 +182,7 @@ namespace CppADS
     };
 
     template<class T>
+    /// @brief Read-write iterator for List container
     class List<T>::iterator : public std::iterator<std::bidirectional_iterator_tag, T>
     {
     private:
@@ -222,6 +226,7 @@ namespace CppADS
     };
 
     template<class T>
+    /// @brief Read-only iterator for List container
     class List<T>::const_iterator : public std::iterator<std::bidirectional_iterator_tag, T>
     {
     private:
