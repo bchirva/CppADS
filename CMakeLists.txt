@@ -14,6 +14,9 @@ target_include_directories(CppADS INTERFACE
 
 target_compile_features(CppADS INTERFACE cxx_std_14)
 
+set(WITH_TESTS OFF CACHE BOOL "Is tests builds required")
+set(WITH_DOCS  OFF CACHE BOOL "Is documentation build required")
+
 if(WITH_TESTS)
     add_subdirectory(tests)
 endif()
