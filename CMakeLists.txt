@@ -15,7 +15,6 @@ target_include_directories(CppADS INTERFACE
 target_compile_features(CppADS INTERFACE cxx_std_14)
 
 if(WITH_TESTS)
-    enable_testing()
     add_subdirectory(tests)
 endif()
 

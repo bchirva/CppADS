@@ -6,10 +6,12 @@ if(DOXYGEN_FOUND)
     configure_file(${DOXYGEN_IN} ${DOXYGEN_OUT} @ONLY)
 
     add_custom_target(documentation ALL
-        COMMAND ${DOXYGEN_EXECUTABLE} ${DOXYGEN_OUT}
+        COMMAND Doxygen::doxygen ${DOXYGEN_OUT}
         WORKING_DIRECTORY ${CMAKE_BINARY_DIR}
         COMMENT "Generating ${PROJECT_NAME} ${PROJECT_VERSION} documentation"
         VERBATIM)
+
+    message("Documentation build has configured")
 else()
-    message("DOXYGEN not found. Documentaion hasn't generated.")
+    message(WARNING "Doxygen not found. Documentaion hasn't generated.")
 endif()
