@@ -1,6 +1,6 @@
 #include <gtest/gtest.h>
 
-#include "ForwardList.hpp"
+#include "forward_list.hpp"
 using CppADS::ForwardList;
 
 TEST (ForwardListTest, ContructTest)

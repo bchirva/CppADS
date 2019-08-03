@@ -1,7 +1,7 @@
 #ifndef ARRAY_H
 #define ARRAY_H
 
-#include "Container.hpp"
+#include "container.hpp"
 
 #include <cmath>
 #include <memory>

@@ -1,7 +1,7 @@
 #ifndef QUEUE_HPP
 #define QUEUE_HPP
 
-#include "ForwardList.hpp"
+#include "forward_list.hpp"
 
 namespace CppADS
 {

@@ -1,6 +1,6 @@
 #include <gtest/gtest.h>
 
-#include <Deque.hpp>
+#include <deque.hpp>
 using CppADS::Deque;
 
 TEST(DequeTest, ConstructDequeTest)
@@ -27,7 +27,7 @@ TEST(DequeTest, AssignDequeTest)
     Deque<int> deque_copy;
     deque_copy = deque_init;
     ASSERT_EQ(deque_copy.size(), init_size);
-    
+
     Deque<int> deque_move;
     deque_move = std::move(deque_init);
     ASSERT_EQ(deque_move.size(), init_size);
@@ -52,7 +52,7 @@ TEST(DequeTest, ModifyDequeTest)
         deque.pop_back();
         deque.pop_front();
     }
-    
+
     ASSERT_EQ(deque.size(), 50);
     ASSERT_EQ(deque.front(), 76);
     ASSERT_EQ(deque.back(), 76);

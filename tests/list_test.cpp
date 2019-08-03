@@ -1,6 +1,6 @@
 #include <gtest/gtest.h>
 
-#include "List.hpp"
+#include "list.hpp"
 using CppADS::List;
 
 TEST(ListTest, ConstructTest)

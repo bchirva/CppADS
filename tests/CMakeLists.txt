@@ -1,29 +1,27 @@
 find_package(GTest QUIET)
 
 if (GTest_FOUND)
-    enable_testing()
-
-    add_executable(ArrayTest ArrayTest.cpp)
+    add_executable(ArrayTest array_test.cpp)
     target_link_libraries(ArrayTest PRIVATE GTest::GTest CppADS::CppADS)
     add_test(ArrayTest "ArrayTest")
 
-    add_executable(ForwardListTest ForwardListTest.cpp)
+    add_executable(ForwardListTest forward_list_test.cpp)
     target_link_libraries(ForwardListTest PRIVATE GTest::GTest CppADS::CppADS)
     add_test(ForwardListTest "ForwardListTest")
 
-    add_executable(ListTest ListTest.cpp)
+    add_executable(ListTest list_test.cpp)
     target_link_libraries(ListTest PRIVATE GTest::GTest CppADS::CppADS)
     add_test(ListTest "ListTest")
 
-    add_executable(StackTest StackTest.cpp)
+    add_executable(StackTest stack_test.cpp)
     target_link_libraries(StackTest PRIVATE GTest::GTest CppADS::CppADS)
     add_test(StackTest "StackTest")
 
-    add_executable(QueueTest QueueTest.cpp)
+    add_executable(QueueTest queue_test.cpp)
     target_link_libraries(QueueTest PRIVATE GTest::GTest CppADS::CppADS)
     add_test(QueueTest "QueueTest")
 
-    add_executable(DequeTest DequeTest.cpp)
+    add_executable(DequeTest deque_test.cpp)
     target_link_libraries(DequeTest PRIVATE GTest::GTest CppADS::CppADS)
     add_test(DequeTest "DequeTest")
 

@@ -1,6 +1,6 @@
 #include <gtest/gtest.h>
 
-#include <Queue.hpp>
+#include <queue.hpp>
 using CppADS::Queue;
 
 TEST(QueueTest, ConstructQueueTest)
@@ -27,7 +27,7 @@ TEST(QueueTest, AssignQueueTest)
     Queue<int> queue_copy;
     queue_copy = queue_init;
     ASSERT_EQ(queue_copy.size(), init_size);
-    
+
     Queue<int> queue_move;
     queue_move = std::move(queue_init);
     ASSERT_EQ(queue_move.size(), init_size);
@@ -45,7 +45,7 @@ TEST(QueueTest, ModifyQueueTest)
 
     while(queue.size() > 50)
         queue.dequeue();
-    
+
     ASSERT_EQ(queue.size(), 50);
     ASSERT_EQ(queue.front(), 50);
 }

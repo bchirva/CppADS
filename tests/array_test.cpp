@@ -1,6 +1,6 @@
 #include <gtest/gtest.h>
 
-#include "Array.hpp"
+#include "array.hpp"
 using CppADS::Array;
 
 TEST(ArrayTest, ConstructTest)

@@ -1,7 +1,7 @@
 #ifndef STACK_H
 #define STACK_H
 
-#include "ForwardList.hpp"
+#include "forward_list.hpp"
 
 namespace CppADS
 {

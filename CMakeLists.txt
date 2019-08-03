@@ -18,6 +18,7 @@ set(WITH_TESTS OFF CACHE BOOL "Is tests builds required")
 set(WITH_DOCS  OFF CACHE BOOL "Is documentation build required")
 
 if(WITH_TESTS)
+    enable_testing()
     add_subdirectory(tests)
 endif()
 
