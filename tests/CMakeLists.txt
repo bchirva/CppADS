@@ -25,6 +25,10 @@ if (GTest_FOUND)
     target_link_libraries(DequeTest PRIVATE GTest::GTest CppADS::CppADS)
     add_test(DequeTest "DequeTest")
 
+    add_executable(HashTableTest hash_table_test.cpp)
+    target_link_libraries(HashTableTest PRIVATE GTest::GTest CppADS::CppADS)
+    add_test(HashTableTest "HashTableTest")
+
     message("Tests build has configured")
 else()
     message(WARNING "GoogleTest not found. Tests hasn't configured")
