@@ -55,6 +55,10 @@ namespace CppADS
         /// @brief Remove all data from container
         void clear() override;
 
+        /// @brief Reserve space for specific count of items
+        /// @param count reserved space
+        void reserve(size_t count);
+
         /// @brief Insert value to container
         /// @param value inserted value
         /// @param index position to insert
@@ -188,7 +192,7 @@ namespace CppADS
                 return std::pow(2, current_power);
             }
             else return 1;
-        };
+        };        
     };
 
     template<typename T>
@@ -197,6 +201,7 @@ namespace CppADS
     {
     private:
         T* m_ptr { nullptr };
+        friend class Array;
 
     public:
         iterator(T* src_ptr = nullptr) : m_ptr(src_ptr) {}
@@ -265,6 +270,7 @@ namespace CppADS
     {
     private:
         T* m_ptr { nullptr };
+        friend class Array;
 
     public:
         const_iterator(T* src_ptr = nullptr) : m_ptr(src_ptr) {}
@@ -396,6 +402,23 @@ void CppADS::Array<T>::clear()
     m_capacity = 0;
 }
 
+template<class T>
+void CppADS::Array<T>::reserve(size_t count)
+{
+    if (count <= capacity())
+        return;
+
+    m_capacity = count;
+    std::unique_ptr<T[]> tmp = std::make_unique<T[]>(m_capacity);
+    auto tmp_it     = tmp.get();
+
+    for (auto data_it = begin(); data_it != end(); data_it++, tmp_it++)
+    {
+        *tmp_it = std::move(*data_it);
+    }
+    m_data = std::move(tmp);
+}
+
 template<typename T>
 size_t CppADS::Array<T>::size() const
 {
@@ -415,41 +438,16 @@ void CppADS::Array<T>::insert(const T& value, size_t index)
         throw std::out_of_range("CppADS::Array<T>::insert: index is out of range");
 
     if (m_capacity == m_size)
+        reserve(m_reserve_func(m_size + 1));
+
+    auto it = end();
+    auto insert_it = begin() + index;
+    while (it != insert_it)
     {
-        m_capacity = m_reserve_func(m_size + 1);
-        std::unique_ptr<T[]> tmp = std::make_unique<T[]>(m_capacity);
-        auto tmp_it     = tmp.get();
-        auto tmp_end    = tmp.get() + m_size + 1;
-        auto insert_it  = begin() + index;
-        auto data_it    = begin();
-
-        while (tmp_it != tmp_end)
-        {
-            if (data_it == insert_it)
-            {
-                *tmp_it = value;
-                tmp_it++;
-                insert_it = nullptr;
-                continue;
-            }
-
-            *tmp_it = std::move(*data_it);
-            tmp_it++;
-            data_it++;
-        }
-        m_data = std::move(tmp);
+        *it = std::move(*(it - 1));
+        it--;
     }
-    else
-    {
-        auto it = end();
-        auto insert_it = begin() + index;
-        while (it != insert_it)
-        {
-            *it = std::move(*(it - 1));
-            it--;
-        }
-        *insert_it = value;
-     }
+    *insert_it = value;
 
     m_size++;
 }
@@ -461,41 +459,16 @@ void CppADS::Array<T>::insert(T&& value, size_t index)
         throw std::out_of_range("CppADS::Array<T>::insert: index is out of range");
 
     if (m_capacity == m_size)
+        reserve(m_reserve_func(m_size + 1));
+
+    auto it = end();
+    auto insert_it = begin() + index;
+    while (it != insert_it)
     {
-        m_capacity = m_reserve_func(m_size + 1);
-        std::unique_ptr<T[]> tmp = std::make_unique<T[]>(m_capacity);
-        auto tmp_it     = tmp.get();
-        auto tmp_end    = tmp.get() + m_size + 1;
-        auto insert_it  = begin() + index;
-        auto data_it    = begin();
-
-        while (tmp_it != tmp_end)
-        {
-            if (data_it == insert_it)
-            {
-                *tmp_it = std::move(value);
-                tmp_it++;
-                insert_it = nullptr;
-                continue;
-            }
-
-            *tmp_it = std::move(*data_it);
-            tmp_it++;
-            data_it++;
-        }
-        m_data = std::move(tmp);
+        *it = std::move(*(it - 1));
+        it--;
     }
-    else
-    {
-        auto it = end();
-        auto insert_it = begin() + index;
-        while (it != insert_it)
-        {
-            *it = std::move(*(it - 1));
-            it--;
-        }
-        *insert_it = std::move(value);
-     }
+    *insert_it = std::move(value);
 
     m_size++;
 }
@@ -508,38 +481,18 @@ void CppADS::Array<T>::insert(const T& value, iterator position)
 
     if (m_capacity == m_size)
     {
-        m_capacity = m_reserve_func(m_size + 1);
-        std::unique_ptr<T[]> tmp = std::make_unique<T[]>(m_capacity);
-        auto tmp_it     = tmp.get();
-        auto tmp_end    = tmp.get() + m_size + 1;
-        auto data_it    = begin();
-
-        while (tmp_it != tmp_end)
-        {
-            if (data_it == position)
-            {
-                *tmp_it = value;
-                tmp_it++;
-                position = nullptr;
-                continue;
-            }
-
-            *tmp_it = std::move(*data_it);
-            tmp_it++;
-            data_it++;
-        }
-        m_data = std::move(tmp);
+        size_t diff = position.m_ptr - begin().m_ptr;
+        reserve(m_reserve_func(m_size + 1));
+        position = begin() + diff;
     }
-    else
+
+    auto it = end();
+    while (it != position)
     {
-        auto it = end();
-        while (it != position)
-        {
-            *it = std::move(*(it - 1));
-            it--;
-        }
-        *position = value;
-     }
+        *it = std::move(*(it - 1));
+        it--;
+    }
+    *position = value;
 
     m_size++;
 }
@@ -552,38 +505,18 @@ void CppADS::Array<T>::insert(T&& value, iterator position)
 
     if (m_capacity == m_size)
     {
-        m_capacity = m_reserve_func(m_size + 1);
-        std::unique_ptr<T[]> tmp = std::make_unique<T[]>(m_capacity);
-        auto tmp_it     = tmp.get();
-        auto tmp_end    = tmp.get() + m_size + 1;
-        auto data_it    = begin();
-
-        while (tmp_it != tmp_end)
-        {
-            if (data_it == position)
-            {
-                *tmp_it = std::move(value);
-                tmp_it++;
-                position = nullptr;
-                continue;
-            }
-
-            *tmp_it = std::move(*data_it);
-            tmp_it++;
-            data_it++;
-        }
-        m_data = std::move(tmp);
+        size_t diff = position.m_ptr - begin().m_ptr;
+        reserve(m_reserve_func(m_size + 1));
+        position = begin() + diff;
     }
-    else
+
+    auto it = end();
+    while (it != position)
     {
-        auto it = end();
-        while (it != position)
-        {
-            *it = std::move(*(it - 1));
-            it--;
-        }
-        *position = std::move(value);
-     }
+        *it = std::move(*(it - 1));
+        it--;
+    }
+    *position = std::move(value);
 
     m_size++;
 }
@@ -789,6 +722,6 @@ typename CppADS::Array<T>::const_reverse_iterator CppADS::Array<T>::rend() const
 template<typename T>
 typename CppADS::Array<T>::const_reverse_iterator CppADS::Array<T>::crend() const {
     return std::reverse_iterator<const_iterator>(m_data.get());
-};
+}
 
 #endif //ARRAY_H
