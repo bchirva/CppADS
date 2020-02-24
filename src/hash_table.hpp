@@ -223,7 +223,6 @@ namespace CppADS
     class HashTable<Key, T>::const_iterator : public std::iterator<std::bidirectional_iterator_tag, T>
     {
     private:
-    private:
         typename Array<HashTable::Bucket>::iterator m_array_it;   ///< @private
         typename HashTable::Bucket::iterator m_bucket_it;         ///< @private
 
@@ -370,7 +369,6 @@ void CppADS::HashTable<Key, T>::clear()
 template<typename Key, typename T>
 void CppADS::HashTable<Key, T>::rehash()
 {
-
 }
 
 template<typename Key, typename T>
@@ -566,14 +564,14 @@ size_t CppADS::HashTable<Key, T>::calcAddress(const Key& key) const
 }
 
 template <typename T>
-typename std::enable_if<std::is_integral<T>::value,long>::type
+typename std::enable_if<std::is_integral<T>::value, uint64_t>::type
 hash(T key)
 {
 
 }
 
 template <typename T>
-typename std::enable_if<std::is_enum<T>::value && std::is_integral<typename std::underlying_type<T>::type>::value,long>::type
+typename std::enable_if<std::is_enum<T>::value && std::is_integral<typename std::underlying_type<T>::type>::value, uint64_t>::type
 hash(T key)
 {
     auto value = static_cast<typename std::underlying_type<T>::type>(key);

@@ -1,5 +1,5 @@
-#ifndef DOUBLEForwardList_H
-#define DOUBLEForwardList_H
+#ifndef FORWARDLIST_H
+#define FORWARDLIST_H
 
 #include "container.hpp"
 

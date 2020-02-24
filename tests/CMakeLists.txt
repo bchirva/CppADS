@@ -33,3 +33,8 @@ if (GTest_FOUND)
 else()
     message(WARNING "GoogleTest not found. Tests hasn't configured")
 endif()
+
+
+if (CMAKE_GENERATOR STREQUAL "Unix Makefiles")
+    set(CMAKE_EXPORT_COMPILE_COMMANDS ON)
+endif()
