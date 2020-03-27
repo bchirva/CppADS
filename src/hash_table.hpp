@@ -8,9 +8,10 @@
 #include <functional>
 #include <memory>
 #include <type_traits>
+#include <limits>
 
 template <typename T>
-long hash(T key);
+size_t hash(T key);
 
 namespace CppADS
 {
@@ -558,20 +559,24 @@ typename CppADS::HashTable<Key, T>::const_iterator CppADS::HashTable<Key, T>::ce
 template<typename Key, typename T>
 size_t CppADS::HashTable<Key, T>::calcAddress(const Key& key) const
 {
-    long hashed_key = hash(key);
-    size_t address = std::abs(hashed_key) % m_buckets.size();
-    return address;
+    return hash(key) % m_buckets.size();
 }
 
 template <typename T>
-typename std::enable_if<std::is_integral<T>::value, uint64_t>::type
+typename std::enable_if<std::is_integral<T>::value, size_t>::type
 hash(T key)
 {
+    size_t result {};
+    if(key >= 0)
+        result = key;
+    else
+        result = std::numeric_limits<T>::max() + key;
 
+    return result;
 }
 
 template <typename T>
-typename std::enable_if<std::is_enum<T>::value && std::is_integral<typename std::underlying_type<T>::type>::value, uint64_t>::type
+typename std::enable_if<std::is_enum<T>::value && std::is_integral<typename std::underlying_type<T>::type>::value, size_t>::type
 hash(T key)
 {
     auto value = static_cast<typename std::underlying_type<T>::type>(key);
