@@ -12,10 +12,10 @@ TEST(DequeTest, ConstructDequeTest)
     ASSERT_EQ(deque_init.size(), 10);
 
     Deque<int> deque_copy(deque_init);
-    ASSERT_EQ(deque_copy.size(), deque_init.size());
+    ASSERT_EQ(deque_copy, deque_init);
 
     Deque<int> deque_move(std::move(deque_init));
-    ASSERT_EQ(deque_move.size(), deque_copy.size());
+    ASSERT_EQ(deque_move, deque_copy);
     ASSERT_EQ(deque_init.size(), 0);
 }
 

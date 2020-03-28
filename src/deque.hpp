@@ -83,6 +83,9 @@ namespace CppADS
         const_reference back() const;
 
         ///@}
+
+        bool operator==(const Deque<T>& rhs) const;
+        bool operator!=(const Deque<T>& rhs) const;
     };
 }
 
@@ -168,6 +171,18 @@ template<typename T>
 typename CppADS::Deque<T>::const_reference CppADS::Deque<T>::back() const
 {
     return List<T>::back();
+}
+
+template<typename T>
+bool CppADS::Deque<T>::operator==(const Deque<T>& rhs) const
+{
+    return List<T>::operator==(rhs);
+}
+
+template<typename T>
+bool CppADS::Deque<T>::operator!=(const Deque<T> &rhs) const
+{
+    return List<T>::operator!=(rhs);
 }
 
 template<typename T>
