@@ -130,6 +130,9 @@ namespace CppADS
 
         /// @}
 
+        bool operator==(const HashTable<Key, T>& rhs) const;
+        bool operator!=(const HashTable<Key, T>& rhs) const;
+
     private:
         using Bucket = CppADS::List<value_type>;
         CppADS::Array<Bucket> m_buckets {};
@@ -564,6 +567,18 @@ typename CppADS::HashTable<Key, T>::const_iterator CppADS::HashTable<Key, T>::en
 template<typename Key, typename T>
 typename CppADS::HashTable<Key, T>::const_iterator CppADS::HashTable<Key, T>::cend() const {
     return const_iterator(m_buckets.end()--, (m_buckets.end()--)->begin()--);
+}
+
+template<typename Key, typename T>
+bool CppADS::HashTable<Key, T>::operator==(const HashTable<Key, T> &rhs) const
+{
+    return m_buckets == rhs.m_buckets;
+}
+
+template<typename Key, typename T>
+bool CppADS::HashTable<Key, T>::operator!=(const HashTable<Key, T> &rhs) const
+{
+    return !(operator==(rhs));
 }
 
 template<typename Key, typename T>

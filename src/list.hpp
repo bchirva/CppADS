@@ -197,9 +197,8 @@ namespace CppADS
             return *(m_ptr->value);
         }
         List<T>::pointer operator->() {
-            return m_ptr->value;
+            return m_ptr->value.get();
         }
-
         iterator& operator++() {
             m_ptr = m_ptr->next.get();
             return *this;
@@ -243,7 +242,6 @@ namespace CppADS
         List<T>::const_pointer operator->() {
             return m_ptr->value.get();
         }
-
         const_iterator& operator++() {
             m_ptr = m_ptr->next.get();
             return *this;
