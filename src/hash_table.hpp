@@ -73,8 +73,6 @@ namespace CppADS
         /// @brief Remove all data from container
         void clear() override;
 
-       
-
         /// @brief Insert value to container
         /// @param key position to insert
         /// @param value inserted value
@@ -308,7 +306,7 @@ CppADS::HashTable<Key, T>::HashTable(HashTable&& move)
 }
 
 template<typename Key, typename T>
-CppADS::HashTable<Key, T>::HashTable(std::initializer_list<HashTable::value_type> init_list)
+CppADS::HashTable<Key, T>::HashTable(std::initializer_list<value_type> init_list)
 {
     for(auto it = init_list.begin(); it != init_list.end(); it++)
         insert(it->first, std::move(it->second));
@@ -373,9 +371,9 @@ void CppADS::HashTable<Key, T>::rehash()
     CppADS::Array<Bucket> old(std::move(m_buckets));
     m_buckets.reserve(m_size * 2);
     m_size = 0;
-    for(auto bucket = old.begin(); bucket != old.end(); bucket++)
+    for(typename CppADS::Array<Bucket>::iterator bucket = old.begin(); bucket != old.end(); bucket++)
     {
-        for(auto cell = *bucket.begin(); cell != *bucket.end(); cell++)
+        for(typename Bucket::iterator cell = (*bucket).begin(); cell != (*bucket).end(); cell++)
         {
             insert(*cell.first, std::move(*cell.second));
         }
@@ -601,7 +599,7 @@ hash(T key)
 {
     size_t result = 0x0;
     size_t length = strlen(key);
-    for (auto i = 0; i < length; i++)
+    for (auto i = 0; static_cast<size_t>(i) < length; i++)
         result ^= key[i] << (i % (sizeof(size_t) * 8));
     return result;
 }
