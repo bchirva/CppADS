@@ -1,17 +1,13 @@
-#ifndef HASHMAP_HPP
-#define HASHMAP_HPP
+#ifndef HASH_TABLE_HPP
+#define HASH_TABLE_HPP
 
 #include "container.hpp"
 #include "array.hpp"
 #include "list.hpp"
+#include "hash_functions.hpp"
 
 #include <functional>
 #include <memory>
-#include <type_traits>
-#include <limits>
-
-template <typename T>
-size_t hash(T key);
 
 namespace CppADS
 {
@@ -76,11 +72,17 @@ namespace CppADS
         /// @brief Insert value to container
         /// @param key position to insert
         /// @param value inserted value
-        void insert(const key_type& key, const mapped_type& value);
+        void insert(key_type key, const mapped_type& value);
         /// @brief Insert value to container
         /// @param key position to insert
         /// @param value inserted value
-        void insert(const key_type& key, mapped_type&& value);
+        void insert(key_type key, mapped_type&& value);
+        /// @brief Insert value to container
+        /// @param pair key-value pair to insert
+        void insert(const value_type& pair);
+        /// @brief Insert value to container
+        /// @param pair key-value pair to insert
+        void insert(value_type&& pair);
 
         /// @brief Remove values from container
         /// @param key position of item to delete
@@ -140,7 +142,7 @@ namespace CppADS
         size_t m_size { 0 };
         size_t m_max_load_factor { 3 };
 
-        inline size_t calc_address(const Key& key) const;
+        inline size_t calc_address(Key key) const;
         void rehash();
     };
 
@@ -154,7 +156,7 @@ namespace CppADS
         typename HashTable::Bucket::iterator m_bucket_it;         ///< @private
 
     public:
-        iterator(typename Array<HashTable::Bucket>::iterator* array_it = nullptr,
+        iterator(typename Array<HashTable::Bucket>::iterator array_it = nullptr,
                  typename HashTable::Bucket::iterator bucket_it = nullptr)
             : m_array_it(array_it), m_bucket_it(bucket_it) {}    ///< @private
         ~iterator() {
@@ -225,12 +227,12 @@ namespace CppADS
     class HashTable<Key, T>::const_iterator : public std::iterator<std::bidirectional_iterator_tag, T>
     {
     private:
-        typename Array<HashTable::Bucket>::iterator m_array_it;   ///< @private
-        typename HashTable::Bucket::iterator m_bucket_it;         ///< @private
+        typename Array<HashTable::Bucket>::const_iterator m_array_it;   ///< @private
+        typename HashTable::HashTable::Bucket::const_iterator m_bucket_it;         ///< @private
 
     public:
-        const_iterator(typename Array<HashTable::Bucket>::iterator* array_it = nullptr,
-                 typename HashTable::Bucket::iterator bucket_it = nullptr)
+        const_iterator(typename Array<HashTable::Bucket>::const_iterator array_it = nullptr,
+                       typename HashTable::Bucket::const_iterator bucket_it = nullptr)
             : m_array_it(array_it), m_bucket_it(bucket_it) {}    ///< @private
         ~const_iterator() {
             m_array_it = nullptr;
@@ -238,7 +240,7 @@ namespace CppADS
         }
 
         HashTable<Key,T>::const_reference operator*() {
-            return *(m_bucket_it->second);
+            return m_bucket_it->second;
         }
         HashTable<Key,T>::const_pointer operator->() {
             return m_bucket_it->second;
@@ -312,7 +314,7 @@ template<typename Key, typename T>
 CppADS::HashTable<Key, T>::HashTable(std::initializer_list<value_type> init_list)
 {
     for(auto it = init_list.begin(); it != init_list.end(); it++)
-        insert(it->first, std::move(it->second));
+        insert(std::move(*it));
 }
 
 template<typename Key, typename T>
@@ -372,19 +374,19 @@ template<typename Key, typename T>
 void CppADS::HashTable<Key, T>::rehash()
 {
     CppADS::Array<Bucket> old(std::move(m_buckets));
-    m_buckets.reserve(m_size * 2);
+    m_buckets.reserve((m_size + 1) * 2);
     m_size = 0;
     for(typename CppADS::Array<Bucket>::iterator bucket = old.begin(); bucket != old.end(); bucket++)
     {
         for(typename Bucket::iterator cell = (*bucket).begin(); cell != (*bucket).end(); cell++)
         {
-            insert(*cell.first, std::move(*cell.second));
+            insert(std::move(*cell));
         }
     }
 }
 
 template<typename Key, typename T>
-void CppADS::HashTable<Key, T>::insert(const HashTable::key_type& key, const HashTable::mapped_type& value)
+void CppADS::HashTable<Key, T>::insert(HashTable::key_type key, const HashTable::mapped_type& value)
 {
     if ((m_buckets.size() == 0) || ((size() + 1) / m_buckets.size() > max_load_factor()))
         rehash();
@@ -412,7 +414,7 @@ void CppADS::HashTable<Key, T>::insert(const HashTable::key_type& key, const Has
 }
 
 template<typename Key, typename T>
-void CppADS::HashTable<Key, T>::insert(const HashTable::key_type& key, HashTable::mapped_type&& value)
+void CppADS::HashTable<Key, T>::insert(key_type key, HashTable::mapped_type&& value)
 {
     if ((m_buckets.size() == 0) || ((size() + 1) / m_buckets.size() > max_load_factor()))
         rehash();
@@ -437,7 +439,63 @@ void CppADS::HashTable<Key, T>::insert(const HashTable::key_type& key, HashTable
     }
     else
         item->second = std::move(value);
-   }
+}
+
+template<typename Key, typename T>
+void CppADS::HashTable<Key, T>::insert(const HashTable::value_type& pair)
+{
+    if ((m_buckets.size() == 0) || ((size() + 1) / m_buckets.size() > max_load_factor()))
+        rehash();
+
+    size_t address = calc_address(pair.first);
+
+    auto item = m_buckets[address].begin();
+    while(item != m_buckets[address].end())
+    {
+        if (item->first == pair.first)
+            break;
+        item++;
+    }
+
+    if(item != m_buckets[address].end())
+    {
+        m_buckets[address].push_back(pair);
+        m_size++;
+
+        if (m_buckets[address].size() > max_load_factor())
+            rehash();
+    }
+    else
+        item->second = pair.second;
+}
+
+template<typename Key, typename T>
+void CppADS::HashTable<Key, T>::insert(HashTable::value_type&& pair)
+{
+    if ((m_buckets.size() == 0) || ((size() + 1) / m_buckets.size() > max_load_factor()))
+        rehash();
+
+    size_t address = calc_address(pair.first);
+
+    auto item = m_buckets[address].begin();
+    while(item != m_buckets[address].end())
+    {
+        if (item->first == pair.first)
+            break;
+        item++;
+    }
+
+    if(item != m_buckets[address].end())
+    {
+        m_buckets[address].push_back(std::move(pair));
+        m_size++;
+
+        if (m_buckets[address].size() > max_load_factor())
+            rehash();
+    }
+    else
+        item->second = std::move(pair.second);
+}
 
 template<typename Key, typename T>
 void CppADS::HashTable<Key, T>::remove(const HashTable::key_type& key)
@@ -561,7 +619,7 @@ typename CppADS::HashTable<Key, T>::iterator CppADS::HashTable<Key, T>::end() {
 
 template<typename Key, typename T>
 typename CppADS::HashTable<Key, T>::const_iterator CppADS::HashTable<Key, T>::end() const {
-    return const_iterator(m_buckets.end()--, (m_buckets.end()--)->begin()--);
+    return const_iterator(m_buckets.cend()--, (m_buckets.cend()--)->begin()--);
 }
 
 template<typename Key, typename T>
@@ -582,41 +640,9 @@ bool CppADS::HashTable<Key, T>::operator!=(const HashTable<Key, T> &rhs) const
 }
 
 template<typename Key, typename T>
-size_t CppADS::HashTable<Key, T>::calc_address(const Key& key) const
+size_t CppADS::HashTable<Key, T>::calc_address(Key key) const
 {
     return hash(key) % m_buckets.size();
-}
-
-template <typename T>
-typename std::enable_if<std::is_integral<T>::value, size_t>::type
-hash(T key)
-{
-    size_t result {};
-    if(key >= 0)
-        result = key;
-    else
-        result = std::numeric_limits<T>::max() + key;
-
-    return result;
-}
-
-template <typename T>
-typename std::enable_if<std::is_enum<T>::value && std::is_integral<typename std::underlying_type<T>::type>::value, size_t>::type
-hash(T key)
-{
-    auto value = static_cast<typename std::underlying_type<T>::type>(key);
-    return hash(value);
-}
-
-template <typename T>
-typename std::enable_if<std::is_same<T, const char*>::value, size_t>::type
-hash(T key)
-{
-    size_t result = 0x0;
-    size_t length = strlen(key);
-    for (auto i = 0; static_cast<size_t>(i) < length; i++)
-        result ^= key[i] << (i % (sizeof(size_t) * 8));
-    return result;
 }
 
 #endif

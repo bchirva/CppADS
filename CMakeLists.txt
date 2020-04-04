@@ -8,9 +8,12 @@ project(CppADS
 add_library(CppADS INTERFACE)
 add_library(CppADS::CppADS ALIAS CppADS)
 
-target_include_directories(CppADS INTERFACE
-    $<BUILD_INTERFACE:${CMAKE_CURRENT_SOURCE_DIR}/src>
+target_include_directories(CppADS INTERFACE 
+    $<BUILD_INTERFACE:${CMAKE_CURRENT_SOURCE_DIR}/include>
     )
+
+#FILE(GLOB SOURCE_CPP ${CMAKE_CURRENT_SOURCE_DIR}/src/*.cpp)
+#target_sources(CppADS PRIVATE ${SOURCE_CPP})
 
 target_compile_features(CppADS INTERFACE cxx_std_14)
 

@@ -1,6 +1,6 @@
 #include <gtest/gtest.h>
 
-#include <queue.hpp>
+#include "queue.hpp"
 using CppADS::Queue;
 
 TEST(QueueTest, ConstructQueueTest)
