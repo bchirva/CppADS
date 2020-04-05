@@ -4,7 +4,6 @@
 #include "container.hpp"
 #include "array.hpp"
 #include "list.hpp"
-#include "hash_functions.hpp"
 
 #include <functional>
 #include <memory>
@@ -69,14 +68,6 @@ namespace CppADS
         /// @brief Remove all data from container
         void clear() override;
 
-        /// @brief Insert value to container
-        /// @param key position to insert
-        /// @param value inserted value
-        void insert(key_type key, const mapped_type& value);
-        /// @brief Insert value to container
-        /// @param key position to insert
-        /// @param value inserted value
-        void insert(key_type key, mapped_type&& value);
         /// @brief Insert value to container
         /// @param pair key-value pair to insert
         void insert(const value_type& pair);
@@ -374,7 +365,11 @@ template<typename Key, typename T>
 void CppADS::HashTable<Key, T>::rehash()
 {
     CppADS::Array<Bucket> old(std::move(m_buckets));
+    
     m_buckets.reserve((m_size + 1) * 2);
+    while(m_buckets.size() < m_buckets.capacity())
+        m_buckets.push_back(Bucket{});
+
     m_size = 0;
     for(typename CppADS::Array<Bucket>::iterator bucket = old.begin(); bucket != old.end(); bucket++)
     {
@@ -383,62 +378,6 @@ void CppADS::HashTable<Key, T>::rehash()
             insert(std::move(*cell));
         }
     }
-}
-
-template<typename Key, typename T>
-void CppADS::HashTable<Key, T>::insert(HashTable::key_type key, const HashTable::mapped_type& value)
-{
-    if ((m_buckets.size() == 0) || ((size() + 1) / m_buckets.size() > max_load_factor()))
-        rehash();
-
-    size_t address = calc_address(key);
-
-    auto item = m_buckets[address].begin();
-    while(item != m_buckets[address].end())
-    {
-        if (item->first == key)
-            break;
-        item++;
-    }
-
-    if(item != m_buckets[address].end())
-    {
-        m_buckets[address].push_back(std::make_pair<key_type, mapped_type>(key, value));
-        m_size++;
-
-        if (m_buckets[address].size() > max_load_factor())
-            rehash();
-    }
-    else
-        item->second = value;
-}
-
-template<typename Key, typename T>
-void CppADS::HashTable<Key, T>::insert(key_type key, HashTable::mapped_type&& value)
-{
-    if ((m_buckets.size() == 0) || ((size() + 1) / m_buckets.size() > max_load_factor()))
-        rehash();
-
-    size_t address = calc_address(key);
-
-    auto item = m_buckets[address].begin();
-    while(item != m_buckets[address].end())
-    {
-        if (item->first == key)
-            break;
-        item++;
-    }
-
-    if(item != m_buckets[address].end())
-    {
-        m_buckets[address].push_back(std::make_pair<key_type, mapped_type>(key, std::move(value)));
-        m_size++;
-
-        if (m_buckets[address].size() > max_load_factor())
-            rehash();
-    }
-    else
-        item->second = std::move(value);
 }
 
 template<typename Key, typename T>
@@ -457,7 +396,7 @@ void CppADS::HashTable<Key, T>::insert(const HashTable::value_type& pair)
         item++;
     }
 
-    if(item != m_buckets[address].end())
+    if(item == m_buckets[address].end())
     {
         m_buckets[address].push_back(pair);
         m_size++;
@@ -485,7 +424,7 @@ void CppADS::HashTable<Key, T>::insert(HashTable::value_type&& pair)
         item++;
     }
 
-    if(item != m_buckets[address].end())
+    if(item == m_buckets[address].end())
     {
         m_buckets[address].push_back(std::move(pair));
         m_size++;
@@ -642,7 +581,7 @@ bool CppADS::HashTable<Key, T>::operator!=(const HashTable<Key, T> &rhs) const
 template<typename Key, typename T>
 size_t CppADS::HashTable<Key, T>::calc_address(Key key) const
 {
-    return hash(key) % m_buckets.size();
+    return std::hash<Key>{}(key) % m_buckets.size();
 }
 
 #endif
