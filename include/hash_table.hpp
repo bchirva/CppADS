@@ -131,7 +131,7 @@ namespace CppADS
         CppADS::Array<Bucket> m_buckets {};
 
         size_t m_size { 0 };
-        size_t m_max_load_factor { 3 };
+        size_t m_max_load_factor { 1 };
 
         inline size_t calc_address(Key key) const;
         void rehash();
@@ -366,7 +366,7 @@ void CppADS::HashTable<Key, T>::rehash()
 {
     CppADS::Array<Bucket> old(std::move(m_buckets));
     
-    m_buckets.reserve((m_size + 1) * 2);
+    m_buckets.reserve(m_size * 2 + 1);
     while(m_buckets.size() < m_buckets.capacity())
         m_buckets.push_back(Bucket{});
 
