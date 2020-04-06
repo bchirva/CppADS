@@ -140,10 +140,6 @@ namespace CppADS
         bool operator==(const Array<T>& rhs) const;
         bool operator!=(const Array<T>& rhs) const;
 
-        /// @brief Set function for reserved size calculation
-        /// @param func function
-        void setReserveFunc(std::function<size_t(size_t)>&& func);
-
         /// @name Iterators
         /// @{
 
@@ -182,17 +178,11 @@ namespace CppADS
         size_t m_size { 0 };                          ///< Array actual size
         size_t m_capacity { 0 };                      ///< Reserved size
 
+        /// @private
         /// @brief Allocation size calculation function
-        /// @param _size for which you need to reserve a space
+        /// @param size for which you need to reserve a space
         /// @return space to resererve
-        std::function<size_t(size_t)> m_reserve_func = [](size_t _size) -> size_t {
-            if (_size > 0)
-            {
-                int current_power = std::ceil(std::log2(_size));
-                return std::pow(2, current_power);
-            }
-            else return 1;
-        };        
+        size_t calc_reserved(size_t size);
     };
 
     template<typename T>
@@ -361,7 +351,7 @@ template<typename T>
 CppADS::Array<T>::Array(std::initializer_list<T> init_list)
 {
     m_size = init_list.size();
-    m_capacity = m_reserve_func(m_size);
+    m_capacity = m_size;
     m_data = std::make_unique<T[]>(m_capacity);
     int i = 0;
     for(auto it = init_list.begin(); it != init_list.end(); it++, i++)
@@ -410,7 +400,7 @@ void CppADS::Array<T>::reserve(size_t count)
 
     m_capacity = count;
     std::unique_ptr<T[]> tmp = std::make_unique<T[]>(m_capacity);
-    auto tmp_it     = tmp.get();
+    auto tmp_it = tmp.get();
 
     for (auto data_it = begin(); data_it != end(); data_it++, tmp_it++)
     {
@@ -438,7 +428,7 @@ void CppADS::Array<T>::insert(const T& value, size_t index)
         throw std::out_of_range("CppADS::Array<T>::insert: index is out of range");
 
     if (m_capacity == m_size)
-        reserve(m_reserve_func(m_size + 1));
+        reserve(calc_reserved(m_size + 1));
 
     auto it = end();
     auto insert_it = begin() + index;
@@ -459,7 +449,7 @@ void CppADS::Array<T>::insert(T&& value, size_t index)
         throw std::out_of_range("CppADS::Array<T>::insert: index is out of range");
 
     if (m_capacity == m_size)
-        reserve(m_reserve_func(m_size + 1));
+        reserve(calc_reserved(m_size + 1));
 
     auto it = end();
     auto insert_it = begin() + index;
@@ -482,7 +472,7 @@ void CppADS::Array<T>::insert(const T& value, iterator position)
     if (m_capacity == m_size)
     {
         size_t diff = position.m_ptr - begin().m_ptr;
-        reserve(m_reserve_func(m_size + 1));
+        reserve(calc_reserved(m_size + 1));
         position = begin() + diff;
     }
 
@@ -506,7 +496,7 @@ void CppADS::Array<T>::insert(T&& value, iterator position)
     if (m_capacity == m_size)
     {
         size_t diff = position.m_ptr - begin().m_ptr;
-        reserve(m_reserve_func(m_size + 1));
+        reserve(calc_reserved(m_size + 1));
         position = begin() + diff;
     }
 
@@ -569,6 +559,13 @@ void CppADS::Array<T>::pop_back()
     remove(end()--);
 }
 
+template<class T>
+size_t CppADS::Array<T>::calc_reserved(size_t size)
+{
+    int current_power = std::ceil(std::log2(size));
+    return std::pow(2, current_power);
+}
+
 template<typename T>
 typename CppADS::Array<T>::reference CppADS::Array<T>::operator[](size_t index)
 {
@@ -607,12 +604,6 @@ template<typename T>
 typename CppADS::Array<T>::const_reference CppADS::Array<T>::front() const
 {
     return *(begin());
-}
-
-template<typename T>
-void CppADS::Array<T>::setReserveFunc(std::function<size_t(size_t)>&& func)
-{
-    m_reserve_func = std::move(func);
 }
 
 template<typename T>
@@ -723,5 +714,6 @@ template<typename T>
 typename CppADS::Array<T>::const_reverse_iterator CppADS::Array<T>::crend() const {
     return std::reverse_iterator<const_iterator>(m_data.get());
 }
+
 
 #endif //ARRAY_H

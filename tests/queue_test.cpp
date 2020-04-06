@@ -3,7 +3,7 @@
 #include "queue.hpp"
 using CppADS::Queue;
 
-TEST(QueueTest, ConstructQueueTest)
+TEST(QueueTest, ConstructTest)
 {
     Queue<int> queue_empty;
     ASSERT_EQ(queue_empty.size(), 0);
@@ -19,7 +19,7 @@ TEST(QueueTest, ConstructQueueTest)
     ASSERT_EQ(queue_init.size(), 0);
 }
 
-TEST(QueueTest, AssignQueueTest)
+TEST(QueueTest, AssignTest)
 {
     Queue<int> queue_init { 0, 1, 2, 3, 4, 5, 6, 7, 8, 9 };
     auto init_size = queue_init.size();
@@ -34,7 +34,7 @@ TEST(QueueTest, AssignQueueTest)
     ASSERT_EQ(queue_init.size(), 0);
 }
 
-TEST(QueueTest, ModifyQueueTest)
+TEST(QueueTest, ModifyTest)
 {
     Queue<int> queue;
     for (int i = 100; i > 0; i--)

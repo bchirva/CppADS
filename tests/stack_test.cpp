@@ -5,6 +5,9 @@ using CppADS::Stack;
 
 TEST(StackTest, ConstructTest)
 {
+    Stack<int> stack_empty;
+    ASSERT_EQ(stack_empty.size(), 0);
+
     Stack<int> stack_init {0,1,2,3,4,5,6};
     ASSERT_EQ(stack_init.size(), 7);
 

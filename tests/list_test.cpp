@@ -7,13 +7,14 @@ TEST(ListTest, ConstructTest)
 {
     List<int> list_empty;
     ASSERT_EQ(list_empty.size(), 0);
+    ASSERT_EQ(list_empty.begin(), list_empty.end());
 
     std::initializer_list<int> init_list { 0, 1, 2, 3, 4, 5, 6, 7, 8, 9 };
 
     List<int> list_init (init_list);
-    auto list_it = init_list.begin();
     ASSERT_EQ(list_init.size(), init_list.size());
-    for (auto it = list_init.begin(); it != list_init.end() && list_it != init_list.end(); ++it, ++list_it){
+    auto list_it = init_list.begin();
+    for (auto it = list_init.begin(); it != list_init.end() && list_it != init_list.end(); ++it, ++list_it) {
         ASSERT_EQ(*it, *list_it);
     }
 
@@ -25,9 +26,23 @@ TEST(ListTest, ConstructTest)
     ASSERT_EQ(list_init.size(), 0);
 }
 
+TEST(ListTest, AssignTest)
+{
+    List<int> list_init { 0, 1, 2, 3, 4, 5, 6, 7, 8, 9 };
+
+    List<int> list_copy;
+    list_copy = list_init;
+    ASSERT_EQ(list_copy, list_init);
+
+    List<int> list_move;
+    list_move = std::move(list_init);
+    ASSERT_EQ(list_move, list_copy);
+    ASSERT_EQ(list_init.size(), 0);
+}
+
 TEST(ListTest, IteratorsTest)
 {
-    List<int> list_init {0,1,2,3,4,5,6,7,8,9};
+    List<int> list_init {0, 1, 2, 3, 4, 5, 6, 7, 8, 9};
 
     int value = 0;
     for(auto it = list_init.begin(); it != list_init.end(); ++it, value++) {
@@ -53,24 +68,6 @@ TEST(ListTest, FindTest)
 
     ASSERT_EQ(end, list.end());
     ASSERT_EQ(item, (list.begin()++)++);
-}
-
-TEST(ListTest, AssignTest)
-{
-    std::initializer_list<int> init_list { 0, 1, 2, 3, 4, 5, 6, 7, 8, 9 };
-    List<int> list_init (init_list);
-
-    List<int> list_copy;
-    list_copy = list_init;
-    ASSERT_EQ(list_copy, list_init);
-
-    List<int> list_move;
-    list_move = std::move(list_init);
-    ASSERT_EQ(list_move, list_copy);
-    ASSERT_EQ(list_init.size(), 0);
-
-    List<int> non_equal {10,11,12,13,14,15};
-    ASSERT_NE(non_equal, list_move);
 }
 
 TEST(ListTest, AccessTest)

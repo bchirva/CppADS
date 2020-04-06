@@ -9,18 +9,26 @@ TEST (ForwardListTest, ContructTest)
     ASSERT_EQ(empty.size(), 0);
     ASSERT_EQ(empty.begin(), empty.end());
 
-    ForwardList<int> init_list {0,1,2,3,4,5,6,7,8,9};
-    ASSERT_EQ(init_list.size(), 10);
+    std::initializer_list<int> init_list {0, 1, 2, 3, 4, 5, 6, 7, 8, 9};
 
-    ForwardList<int> copy_list (init_list);
-    ForwardList<int> move_list (std::move(init_list));
-    ASSERT_EQ(copy_list, move_list);
+    ForwardList<int> list_init (init_list);
+    ASSERT_EQ(list_init.size(), init_list.size());
+    auto list_it = init_list.begin();
+    for (auto it = list_init.begin(); it != list_init.end() && list_it != init_list.end(); ++it, ++list_it) {
+        ASSERT_EQ(*it, *list_it);
+    }
+
+    ForwardList<int> list_copy (list_init);
+    ASSERT_EQ(list_init, list_copy);
+
+    ForwardList<int> list_move (std::move(list_init));
+    ASSERT_EQ(list_copy, list_move);
+    ASSERT_EQ(list_init.size(), 0);
 }
 
 TEST(ForwardListTest, AssignTest)
 {
-    std::initializer_list<int> init_list { 0, 1, 2, 3, 4, 5, 6, 7, 8, 9 };
-    ForwardList<int> list_init (init_list);
+    ForwardList<int> list_init { 0, 1, 2, 3, 4, 5, 6, 7, 8, 9 };
 
     ForwardList<int> list_copy;
     list_copy = list_init;
@@ -30,9 +38,6 @@ TEST(ForwardListTest, AssignTest)
     list_move = std::move(list_init);
     ASSERT_EQ(list_move, list_copy);
     ASSERT_EQ(list_init.size(), 0);
-
-    ForwardList<int> non_equal {10,11,12,13,14,15};
-    ASSERT_NE(non_equal, list_move);
 }
 
 TEST(ForwardListTest, IteratorsTest)
