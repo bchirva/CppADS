@@ -74,18 +74,13 @@ TEST(ListTest, AccessTest)
 {
     List<int> list { 42, 1, 2, 3, 4, 5, 6, 7, 8, 69 };
 
-    try {
-        const int var = list[66];
-        (void)(var);
-    } catch (std::out_of_range& exception) {
-        ASSERT_EQ(exception.what(), std::string("CppADS::List<T>::operator[]: index is out of range"));
-    }
-
     list[5] = 50;
     int var = list[5];
     ASSERT_EQ(var, 50);
     ASSERT_EQ(list.front(), 42);
     ASSERT_EQ(list.back(), 69);
+
+    ASSERT_THROW(list[66], std::out_of_range);
 }
 
 TEST(ListTest, InsertTest)

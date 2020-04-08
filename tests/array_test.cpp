@@ -74,18 +74,13 @@ TEST(ArrayTest, AccessTest)
 {
     Array<int> array { 42, 1, 2, 3, 4, 5, 6, 7, 8, 69 };
 
-    try {
-        const int var = array[66];
-        (void)(var);
-    } catch (std::out_of_range& exception) {
-        ASSERT_EQ(exception.what(), std::string("CppADS::Array<T>::operator[]: index is out of range"));
-    }
-
     array[5] = 50;
     int var = array[5];
     ASSERT_EQ(var, 50);
     ASSERT_EQ(array.front(), 42);
     ASSERT_EQ(array.back(), 69);
+
+    ASSERT_THROW(array[66], std::out_of_range);
 }
 
 TEST(ArrayTest, InsertTest)
@@ -103,16 +98,8 @@ TEST(ArrayTest, InsertTest)
     ASSERT_EQ(array, Array<int>({100, -11, 0, 1, 2, 789, 3, 4, 5, 6, 7, 9000, 1234, 42}));
     ASSERT_EQ(array.size(), 14);
 
-    try {
-        array.insert(42, 666);
-    } catch (std::out_of_range& exception) {
-        ASSERT_EQ(exception.what(), std::string("CppADS::Array<T>::insert: index is out of range"));
-    }
-    try {
-        array.insert(42, array.begin() - 666);
-    } catch (std::out_of_range& exception) {
-        ASSERT_EQ(exception.what(), std::string("CppADS::Array<T>::insert: iterator is invalid"));
-    }
+    ASSERT_THROW(array.insert(42, 666), std::out_of_range);
+    ASSERT_THROW(array.insert(42, array.begin() - 666), std::out_of_range);
 }
 
 TEST(ArrayTest, RemoveTest)
@@ -131,17 +118,8 @@ TEST(ArrayTest, RemoveTest)
     array.clear();
     ASSERT_EQ(array.size(), 0);
 
-    try {
-        array.remove(66);
-    } catch (std::out_of_range& exception) {
-        ASSERT_EQ(exception.what(), std::string("CppADS::Array<T>::remove: index is out of range"));
-    }
-
-    try {
-        array.remove(array.begin() - 99);
-    } catch (std::out_of_range& exception) {
-        ASSERT_EQ(exception.what(), std::string("CppADS::Array<T>::remove: iterator is invalid"));
-    }
+    ASSERT_THROW(array.remove(66), std::out_of_range);
+    ASSERT_THROW(array.remove(array.begin() - 99), std::out_of_range);
 }
 
 TEST(ArrayTest, CapacityTest)
