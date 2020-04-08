@@ -3,7 +3,7 @@
 
 #include "container.hpp"
 #include "array.hpp"
-#include "list.hpp"
+#include "forward_list.hpp"
 
 #include <functional>
 #include <memory>
@@ -20,10 +20,10 @@ namespace CppADS
         using key_type = Key;
         using mapped_type = T;
         using value_type = std::pair<key_type, mapped_type>;
-        using reference = mapped_type&;
-        using const_reference = const mapped_type&;
-        using pointer = mapped_type*;
-        using const_pointer = const mapped_type*;
+        using reference = value_type&;
+        using const_reference = const value_type&;
+        using pointer = value_type*;
+        using const_pointer = const value_type*;
 
         class iterator;
         class const_iterator;
@@ -86,12 +86,12 @@ namespace CppADS
         /// @brief Access to item
         /// @param key item position
         /// @return reference to value
-        reference operator[](const key_type& key);
+        mapped_type& operator[](const key_type& key);
 
         /// @brief Access to item
         /// @param key item position
         /// @return reference to value
-        const_reference operator[](const key_type& key) const;
+        const mapped_type& operator[](const key_type& key) const;
 
         /// @brief Search for first item equal value
         /// @param key value search for
@@ -127,7 +127,7 @@ namespace CppADS
         bool operator!=(const HashTable<Key, T>& rhs) const;
 
     private:
-        using Bucket = CppADS::List<value_type>;
+        using Bucket = CppADS::ForwardList<value_type>;
         CppADS::Array<Bucket> m_buckets {};
 
         size_t m_size { 0 };
@@ -137,154 +137,147 @@ namespace CppADS
         void rehash();
     };
 
-
     template<typename Key, typename T>
     /// @brief Read-write iterator for List container
-    class HashTable<Key, T>::iterator : public std::iterator<std::bidirectional_iterator_tag, T>
+    class HashTable<Key, T>::iterator : public std::iterator<std::forward_iterator_tag, value_type>
     {
     private:
-        typename Array<HashTable::Bucket>::iterator m_array_it;   ///< @private
-        typename HashTable::Bucket::iterator m_bucket_it;         ///< @private
+        HashTable<Key, T>* m_container;
+        typename Array<Bucket>::iterator m_bucket_it;
+        typename Bucket::iterator        m_cell_it;
+
+        inline bool is_end_of_bucket()
+        {
+            return (m_cell_it == m_bucket_it->end() && m_bucket_it != (m_container->m_buckets.end()--));
+        }
 
     public:
-        iterator(typename Array<HashTable::Bucket>::iterator array_it = nullptr,
-                 typename HashTable::Bucket::iterator bucket_it = nullptr)
-            : m_array_it(array_it), m_bucket_it(bucket_it) {}    ///< @private
+        iterator(typename Array<Bucket>::iterator bucket_it,
+                 typename Bucket::iterator cell_it,
+                 HashTable<Key,T>* container)
+            : m_container(container), m_bucket_it(bucket_it), m_cell_it(cell_it)
+        {
+            if (is_end_of_bucket())
+                this->operator++();
+        }
         ~iterator() {
-            m_array_it = nullptr;
             m_bucket_it = nullptr;
+            m_cell_it = nullptr;
         }
 
         HashTable<Key,T>::reference operator*() {
-            return *(m_bucket_it->second);
+            return m_cell_it.operator*();
         }
         HashTable<Key,T>::pointer operator->() {
-            return m_bucket_it->second;
+            return m_cell_it.operator->();
         }
 
         iterator& operator++() {
-            m_bucket_it++;
-            if (m_bucket_it == m_array_it->end())
+            do
             {
-                m_array_it++;
-                m_bucket_it = m_array_it->begin();
+                if (is_end_of_bucket())
+                {
+                    m_bucket_it++;
+                    m_cell_it = m_bucket_it->begin();
+                }
+                else
+                    m_cell_it++;
             }
-            return *this;
-        }
-        iterator& operator--() {
-            if (m_bucket_it == m_array_it->begin())
-            {
-                m_array_it--;
-                m_bucket_it = m_array_it->end()--;
-            }
-            else
-            {
-                m_bucket_it--;
-            }
+            while (is_end_of_bucket());
             return *this;
         }
         iterator& operator++(int) {
-            m_bucket_it++;
-            if (m_bucket_it == m_array_it->end())
+            do
             {
-                m_array_it++;
-                m_bucket_it = m_array_it->begin();
+                if (is_end_of_bucket())
+                {
+                    m_bucket_it++;
+                    m_cell_it = m_bucket_it->begin();
+                }
+                else
+                    m_cell_it++;
             }
-            return *this;
-        }
-        iterator& operator--(int) {
-            if (m_bucket_it == m_array_it->begin())
-            {
-                m_array_it--;
-                m_bucket_it = m_array_it->end()--;
-            }
-            else
-            {
-                m_bucket_it--;
-            }
+            while (is_end_of_bucket());
             return *this;
         }
 
         bool operator==(const iterator& rhs) const {
-            return m_bucket_it == rhs.m_bucket_it;
+            return (m_bucket_it == rhs.m_bucket_it && m_cell_it == rhs.m_cell_it);
         }
         bool operator!=(const iterator& rhs) const {
-            return m_bucket_it != rhs.m_bucket_it;
+            return !(this->operator==(rhs));
         }
     };
 
     template<typename Key, typename T>
     /// @brief Read-only iterator for List container
-    class HashTable<Key, T>::const_iterator : public std::iterator<std::bidirectional_iterator_tag, T>
+    class HashTable<Key, T>::const_iterator : public std::iterator<std::forward_iterator_tag, value_type>
     {
     private:
-        typename Array<HashTable::Bucket>::const_iterator m_array_it;   ///< @private
-        typename HashTable::HashTable::Bucket::const_iterator m_bucket_it;         ///< @private
+        const HashTable<Key, T>* m_container;
+        typename Array<Bucket>::const_iterator m_bucket_it;
+        typename Bucket::const_iterator        m_cell_it;
+
+        inline bool is_end_of_bucket()
+        {
+            return (m_cell_it == m_bucket_it->end() && m_bucket_it != (m_container->m_buckets.end()--));
+        }
 
     public:
-        const_iterator(typename Array<HashTable::Bucket>::const_iterator array_it = nullptr,
-                       typename HashTable::Bucket::const_iterator bucket_it = nullptr)
-            : m_array_it(array_it), m_bucket_it(bucket_it) {}    ///< @private
+        const_iterator(typename Array<Bucket>::const_iterator bucket_it,
+                       typename Bucket::const_iterator cell_it,
+                       const HashTable<Key, T>* container)
+            : m_container(container), m_bucket_it(bucket_it), m_cell_it(cell_it)
+        {
+            if (is_end_of_bucket())
+                this->operator++();
+        }
         ~const_iterator() {
-            m_array_it = nullptr;
             m_bucket_it = nullptr;
+            m_cell_it = nullptr;
         }
 
         HashTable<Key,T>::const_reference operator*() {
-            return m_bucket_it->second;
+            return m_cell_it.operator*();
         }
         HashTable<Key,T>::const_pointer operator->() {
-            return m_bucket_it->second;
+            return m_cell_it.operator->();
         }
 
         const_iterator& operator++() {
-            m_bucket_it++;
-            if (m_bucket_it == m_array_it->end())
+            do
             {
-                m_array_it++;
-                m_bucket_it = m_array_it->begin();
+                if (is_end_of_bucket())
+                {
+                    m_bucket_it++;
+                    m_cell_it = m_bucket_it->begin();
+                }
+                else
+                    m_cell_it++;
             }
-            return *this;
-        }
-        const_iterator& operator--() {
-            if (m_bucket_it == m_array_it->begin())
-            {
-                m_array_it--;
-                m_bucket_it = m_array_it->end()--;
-            }
-            else
-            {
-                m_bucket_it--;
-            }
+            while (is_end_of_bucket());
             return *this;
         }
         const_iterator& operator++(int) {
-            m_bucket_it++;
-            if (m_bucket_it == m_array_it->end())
+            do
             {
-                m_array_it++;
-                m_bucket_it = m_array_it->begin();
+                if (is_end_of_bucket())
+                {
+                    m_bucket_it++;
+                    m_cell_it = m_bucket_it.begin();
+                }
+                else
+                    m_cell_it++;
             }
-            return *this;
-        }
-        const_iterator& operator--(int) {
-            if (m_bucket_it == m_array_it->begin())
-            {
-                m_array_it--;
-                m_bucket_it = m_array_it->end()--;
-            }
-            else
-            {
-                m_bucket_it--;
-            }
+            while (is_end_of_bucket());
             return *this;
         }
 
         bool operator==(const const_iterator& rhs) const {
-            return m_bucket_it == rhs.m_bucket_it;
+            return (m_bucket_it == rhs.m_bucket_it && m_cell_it == rhs.m_cell_it);
         }
         bool operator!=(const const_iterator& rhs) const {
-            return m_bucket_it != rhs.m_bucket_it;
+            return !(this->operator==(rhs));
         }
     };
 }
@@ -364,6 +357,7 @@ void CppADS::HashTable<Key, T>::clear()
 template<typename Key, typename T>
 void CppADS::HashTable<Key, T>::rehash()
 {
+    std::cout << "Rehash " << m_buckets.size() << " -> " << m_size * 2 + 1 << std::endl;
     CppADS::Array<Bucket> old(std::move(m_buckets));
     
     m_buckets.reserve(m_size * 2 + 1);
@@ -387,7 +381,6 @@ void CppADS::HashTable<Key, T>::insert(const HashTable::value_type& pair)
         rehash();
 
     size_t address = calc_address(pair.first);
-
     auto item = m_buckets[address].begin();
     while(item != m_buckets[address].end())
     {
@@ -415,7 +408,6 @@ void CppADS::HashTable<Key, T>::insert(HashTable::value_type&& pair)
         rehash();
 
     size_t address = calc_address(pair.first);
-
     auto item = m_buckets[address].begin();
     while(item != m_buckets[address].end())
     {
@@ -442,20 +434,22 @@ void CppADS::HashTable<Key, T>::remove(const HashTable::key_type& key)
     size_t address = calc_address(key);
 
     auto item = m_buckets[address].begin();
+    auto remove_after = m_buckets[address].before_begin();
     while(item != m_buckets[address].end())
     {
         if (item->first == key)
             break;
         item++;
+        remove_after++;
     }
     if (item != m_buckets[address].end())
-        m_buckets[address].remove(item);
+        m_buckets[address].remove_after(remove_after);
 
     m_size--;
 }
 
 template<typename Key, typename T>
-typename CppADS::HashTable<Key, T>::reference CppADS::HashTable<Key, T>::operator[](const HashTable::key_type& key)
+typename CppADS::HashTable<Key, T>::mapped_type& CppADS::HashTable<Key, T>::operator[](const HashTable::key_type& key)
 {
     size_t address = calc_address(key);
 
@@ -478,7 +472,7 @@ typename CppADS::HashTable<Key, T>::reference CppADS::HashTable<Key, T>::operato
 }
 
 template<typename Key, typename T>
-typename CppADS::HashTable<Key, T>::const_reference CppADS::HashTable<Key, T>::operator[](const HashTable::key_type& key) const
+const typename CppADS::HashTable<Key, T>::mapped_type& CppADS::HashTable<Key, T>::operator[](const HashTable::key_type& key) const
 {
     size_t address = calc_address(key);
 
@@ -538,32 +532,32 @@ typename CppADS::HashTable<Key, T>::const_iterator CppADS::HashTable<Key, T>::fi
 
 template<typename Key, typename T>
 typename CppADS::HashTable<Key, T>::iterator CppADS::HashTable<Key, T>::begin() {
-    return iterator(m_buckets.begin(), m_buckets.begin()->begin());
+    return iterator(m_buckets.begin(), m_buckets.begin()->begin(), this);
 }
 
 template<typename Key, typename T>
 typename CppADS::HashTable<Key, T>::const_iterator CppADS::HashTable<Key, T>::begin() const {
-    return const_iterator(m_buckets.begin(), m_buckets.begin()->begin());
+    return const_iterator(m_buckets.cbegin(), m_buckets.cbegin()->cbegin(), this);
 }
 
 template<typename Key, typename T>
 typename CppADS::HashTable<Key, T>::const_iterator CppADS::HashTable<Key, T>::cbegin() const {
-    return const_iterator(m_buckets.begin(), m_buckets.begin()->begin());
+    return const_iterator(m_buckets.cbegin(), m_buckets.cbegin()->cbegin(), this);
 }
 
 template<typename Key, typename T>
 typename CppADS::HashTable<Key, T>::iterator CppADS::HashTable<Key, T>::end() {
-    return iterator(m_buckets.end()--, (m_buckets.end()--)->begin()--);
+    return iterator(m_buckets.end()--, (m_buckets.end()--)->end(), this);
 }
 
 template<typename Key, typename T>
 typename CppADS::HashTable<Key, T>::const_iterator CppADS::HashTable<Key, T>::end() const {
-    return const_iterator(m_buckets.cend()--, (m_buckets.cend()--)->begin()--);
+    return const_iterator(m_buckets.cend()--, (m_buckets.cend()--)->cend(), this);
 }
 
 template<typename Key, typename T>
 typename CppADS::HashTable<Key, T>::const_iterator CppADS::HashTable<Key, T>::cend() const {
-    return const_iterator(m_buckets.end()--, (m_buckets.end()--)->begin()--);
+    return const_iterator(m_buckets.cend()--, (m_buckets.cend()--)->cend(), this);
 }
 
 template<typename Key, typename T>
