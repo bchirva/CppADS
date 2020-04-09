@@ -128,7 +128,7 @@ namespace CppADS
 
     private:
         using Bucket = CppADS::ForwardList<value_type>;
-        CppADS::Array<Bucket> m_buckets {};
+        CppADS::Array<Bucket> m_buckets {Bucket{}};
 
         size_t m_size { 0 };
         size_t m_max_load_factor { 1 };
@@ -357,19 +357,17 @@ void CppADS::HashTable<Key, T>::clear()
 template<typename Key, typename T>
 void CppADS::HashTable<Key, T>::rehash()
 {
-    std::cout << "Rehash " << m_buckets.size() << " -> " << m_size * 2 + 1 << std::endl;
-    CppADS::Array<Bucket> old(std::move(m_buckets));
-    
-    m_buckets.reserve(m_size * 2 + 1);
+    size_t old_size = m_buckets.size();
+    CppADS::Array<Bucket> old(std::move(m_buckets));    
+    m_buckets.reserve(old_size * 2 + 1);
     while(m_buckets.size() < m_buckets.capacity())
         m_buckets.push_back(Bucket{});
 
-    m_size = 0;
     for(typename CppADS::Array<Bucket>::iterator bucket = old.begin(); bucket != old.end(); bucket++)
     {
         for(typename Bucket::iterator cell = (*bucket).begin(); cell != (*bucket).end(); cell++)
         {
-            insert(std::move(*cell));
+            m_buckets[calc_address(cell->first)].push_back(std::move(*cell));
         }
     }
 }
