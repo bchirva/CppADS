@@ -1,19 +1,20 @@
 #include <gtest/gtest.h>
 
-#include "Array.hpp"
+#include "array.hpp"
 using CppADS::Array;
 
 TEST(ArrayTest, ConstructTest)
 {
     Array<int> array_empty;
     ASSERT_EQ(array_empty.size(), 0);
+    ASSERT_EQ(array_empty.begin(), array_empty.end());
 
     std::initializer_list<int> init_list { 0, 1, 2, 3, 4, 5, 6, 7, 8, 9 };
 
     Array<int> array_init (init_list);
-    auto list_it = init_list.begin();
     ASSERT_EQ(array_init.size(), init_list.size());
-    for (auto it = array_init.begin(); it != array_init.end() && list_it != init_list.end(); ++it, ++list_it){
+    auto list_it = init_list.begin();
+    for (auto it = array_init.begin(); it != array_init.end() && list_it != init_list.end(); ++it, ++list_it) {
         ASSERT_EQ(*it, *list_it);
     }
 
@@ -21,13 +22,27 @@ TEST(ArrayTest, ConstructTest)
     ASSERT_EQ(array_copy, array_init);
 
     Array<int> array_move (std::move(array_init));
+    ASSERT_EQ(array_copy, array_move);
+    ASSERT_EQ(array_init.size(), 0);
+}
+
+TEST(ArrayTest, AssignTest)
+{
+    Array<int> array_init { 0, 1, 2, 3, 4, 5, 6, 7, 8, 9 };
+
+    Array<int> array_copy;
+    array_copy = array_init;
+    ASSERT_EQ(array_copy, array_init);
+
+    Array<int> array_move;
+    array_move = std::move(array_init);
     ASSERT_EQ(array_move, array_copy);
     ASSERT_EQ(array_init.size(), 0);
 }
 
 TEST(ArrayTest, IteratorsTest)
 {
-    Array<int> array_init {0,1,2,3,4,5,6,7,8,9};
+    Array<int> array_init {0, 1, 2, 3, 4, 5, 6, 7, 8, 9};
 
     int value = 0;
     for(auto it = array_init.begin(); it != array_init.end(); ++it, value++) {
@@ -47,7 +62,7 @@ TEST(ArrayTest, IteratorsTest)
 
 TEST(ArrayTest, FindTest)
 {
-    Array<int> array {0,11,22,33,44,55,66,77,88,99};
+    Array<int> array {0, 11, 22, 33, 44, 55, 66, 77, 88, 99};
     auto item = array.find(22);
     auto end = array.find(-1);
 
@@ -55,40 +70,17 @@ TEST(ArrayTest, FindTest)
     ASSERT_EQ(item, array.begin() + 2);
 }
 
-TEST(ArrayTest, AssignTest)
-{
-    std::initializer_list<int> init_list { 0, 1, 2, 3, 4, 5, 6, 7, 8, 9 };
-    Array<int> array_init (init_list);
-
-    Array<int> array_copy;
-    array_copy = array_init;
-    ASSERT_EQ(array_copy, array_init);
-
-    Array<int> array_move;
-    array_move = std::move(array_init);
-    ASSERT_EQ(array_move, array_copy);
-    ASSERT_EQ(array_init.size(), 0);
-
-    Array<int> non_equal {10,11,12,13,14,15};
-    ASSERT_NE(non_equal, array_move);
-}
-
 TEST(ArrayTest, AccessTest)
 {
     Array<int> array { 42, 1, 2, 3, 4, 5, 6, 7, 8, 69 };
-
-    try {
-        const int var = array[66];
-        (void)(var);
-    } catch (std::out_of_range& exception) {
-        ASSERT_EQ(exception.what(), std::string("CppADS::Array<T>::operator[]: index is out of range"));
-    }
 
     array[5] = 50;
     int var = array[5];
     ASSERT_EQ(var, 50);
     ASSERT_EQ(array.front(), 42);
     ASSERT_EQ(array.back(), 69);
+
+    ASSERT_THROW(array[66], std::out_of_range);
 }
 
 TEST(ArrayTest, InsertTest)
@@ -106,17 +98,13 @@ TEST(ArrayTest, InsertTest)
     ASSERT_EQ(array, Array<int>({100, -11, 0, 1, 2, 789, 3, 4, 5, 6, 7, 9000, 1234, 42}));
     ASSERT_EQ(array.size(), 14);
 
-    try {
-        array.insert(42, 666);
-    } catch (std::out_of_range& exception) {
-        ASSERT_EQ(exception.what(), std::string("CppADS::Array<T>::insert: index is out of range"));
-    }
-    try {
-        array.insert(42, array.begin() - 666);
-    } catch (std::out_of_range& exception) {
-        ASSERT_EQ(exception.what(), std::string("CppADS::Array<T>::insert: iterator is invalid"));
-    }
+    array.clear();
+    for (int i = 1; i < 100; i += 10)
+        array.push_back(i);
+    ASSERT_EQ(array, Array<int>({1, 11, 21, 31, 41, 51, 61, 71, 81, 91}));
 
+    ASSERT_THROW(array.insert(42, 666), std::out_of_range);
+    ASSERT_THROW(array.insert(42, array.begin() - 666), std::out_of_range);
 }
 
 TEST(ArrayTest, RemoveTest)
@@ -135,17 +123,8 @@ TEST(ArrayTest, RemoveTest)
     array.clear();
     ASSERT_EQ(array.size(), 0);
 
-    try {
-        array.remove(66);
-    } catch (std::out_of_range& exception) {
-        ASSERT_EQ(exception.what(), std::string("CppADS::Array<T>::remove: index is out of range"));
-    }
-
-    try {
-        array.remove(array.begin() - 99);
-    } catch (std::out_of_range& exception) {
-        ASSERT_EQ(exception.what(), std::string("CppADS::Array<T>::remove: iterator is invalid"));
-    }
+    ASSERT_THROW(array.remove(66), std::out_of_range);
+    ASSERT_THROW(array.remove(array.begin() - 99), std::out_of_range);
 }
 
 TEST(ArrayTest, CapacityTest)

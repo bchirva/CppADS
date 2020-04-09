@@ -1,12 +1,13 @@
 #ifndef QUEUE_HPP
 #define QUEUE_HPP
 
-#include "ForwardList.hpp"
+#include "forward_list.hpp"
 
 namespace CppADS
 {
+    /// @brief FIFO data structure class
+    /// @tparam T value type stored in the container
     template<class T>
-    /// @brief Queue (FIFO) class
     class Queue : private ForwardList<T>
     {
     public:
@@ -26,27 +27,43 @@ namespace CppADS
 
         ~Queue() = default;                             ///< Destructor
 
-        /// @brief Remove all data from container
-        void clear() override;
+        /// @name Capacity
+        /// @{
 
         /// @brief Get size of container
         /// @return element's count
         size_t size() const override;
 
+        /// @}
+        /// @name Modifiers
+        /// @{
+
+        /// @brief Remove all data from container
+        void clear() override;
+
         /// @brief Add value to tail of queue
         /// @param value added value
         void enqueue(const T& value);
 
-        /// @brief Overloaded method
+        /// @brief Add value to tail of queue
+        /// @param value added value
         void enqueue(T&& value);
 
         /// @brief Remove front element
         void dequeue();
 
+        ///@}
+        /// @name Accesors
+        /// @{
+
+        /// @brief Get first inserted value
+        /// @return reference to the first item of the queue
         reference front();
         /// @brief Get first inserted value
-        /// @return value on front of the queue
+        /// @return const reference to the first item of the queue
         const_reference front() const;
+
+        /// @}
     };
 }
 

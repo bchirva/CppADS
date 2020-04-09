@@ -1,10 +1,13 @@
 #include <gtest/gtest.h>
 
-#include "Stack.hpp"
+#include "stack.hpp"
 using CppADS::Stack;
 
 TEST(StackTest, ConstructTest)
 {
+    Stack<int> stack_empty;
+    ASSERT_EQ(stack_empty.size(), 0);
+
     Stack<int> stack_init {0,1,2,3,4,5,6};
     ASSERT_EQ(stack_init.size(), 7);
 
@@ -62,7 +65,7 @@ TEST(StackTest, ModifyTest)
 
     while(stack.size() > 50)
         stack.pop();
-    
+
     ASSERT_EQ(stack.size(), 50);
     ASSERT_EQ(stack.top(), 49);
 }

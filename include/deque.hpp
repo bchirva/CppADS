@@ -1,13 +1,14 @@
 #ifndef DEQUE_HPP
 #define DEQUE_HPP
 
-#include "List.hpp"
+#include "list.hpp"
 
 namespace CppADS
 {
-    template<typename T>
     /// @brief Double-endian queue class
-    class Deque : public List<T>
+    /// @tparam T value type stored in the container
+    template<typename T>
+    class Deque : private List<T>
     {
     public:
         using value_type = T;
@@ -26,18 +27,26 @@ namespace CppADS
 
         ~Deque() = default;                         ///< Destructor
 
-        /// @brief Remove all data from container
-        void clear() override;
+        /// @name Capacity
+        /// @{
 
         /// @brief Get size of container
         /// @return element's count
         size_t size() const override;
 
+        /// @}
+        /// @name Modifiers
+        /// @{
+
+        /// @brief Remove all data from container
+        void clear() override;
+
         /// @brief Insert element to the end
         /// @param value inserted item
         void push_back(const T& value);
 
-        /// @brief Overloaded method
+        /// @brief Insert element to the end
+        /// @param value inserted item
         void push_back(T&& value);
 
         /// @brief Insert element to the beginning
@@ -52,6 +61,10 @@ namespace CppADS
 
         /// @brief Remove first element
         void pop_front();
+
+        ///@}
+        /// @name Accesors
+        /// @{
 
         /// @brief Access to the first element
         /// @return Reference to the first element
@@ -68,6 +81,11 @@ namespace CppADS
         /// @brief Access to the last element
         /// @return Reference to the last element
         const_reference back() const;
+
+        ///@}
+
+        bool operator==(const Deque<T>& rhs) const;
+        bool operator!=(const Deque<T>& rhs) const;
     };
 }
 
@@ -153,6 +171,18 @@ template<typename T>
 typename CppADS::Deque<T>::const_reference CppADS::Deque<T>::back() const
 {
     return List<T>::back();
+}
+
+template<typename T>
+bool CppADS::Deque<T>::operator==(const Deque<T>& rhs) const
+{
+    return List<T>::operator==(rhs);
+}
+
+template<typename T>
+bool CppADS::Deque<T>::operator!=(const Deque<T> &rhs) const
+{
+    return List<T>::operator!=(rhs);
 }
 
 template<typename T>

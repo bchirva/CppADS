@@ -1,12 +1,13 @@
 #ifndef STACK_H
 #define STACK_H
 
-#include "ForwardList.hpp"
+#include "forward_list.hpp"
 
 namespace CppADS
 {
+    /// @brief LIFO data structure class
+    /// @tparam T value type stored in the container
     template<class T>
-    /// @brief Stack (LIFO) class
     class Stack : private ForwardList<T>
     {
     public:
@@ -26,29 +27,44 @@ namespace CppADS
 
         ~Stack() = default;                         ///< Destructor
 
-        /// @brief Remove all data from container
-        void clear() override;
+        /// @name Capacity
+        /// @{
 
         /// @brief Get size of container
         /// @return element's count
         size_t size() const override;
 
+        /// @}
+        /// @name Modifiers
+        /// @{
+
+        /// @brief Remove all data from container
+        void clear() override;
+
         /// @brief Push value on top of the stack
         /// @param value added value
         void push(const T& value);
 
-        /// @brief Overloaded method
+        /// @brief Push value on top of the stack
+        /// @param value added value
         void push(T&& value);
-
-        /// @brief Get last inserted value
-        /// @return value on top of the stack
-        reference top();
-
-        /// @brief Overloaded method
-        const_reference top() const;
 
         /// @brief Remove top item
         void pop();
+
+        ///@}
+        /// @name Accesors
+        /// @{
+
+        /// @brief Get last inserted value
+        /// @return reference to the item on top of the stack
+        reference top();
+
+        /// @brief Get last inserted value
+        /// @return const reference to the item on top of the stack
+        const_reference top() const;
+
+        /// @}
     };
 }
 

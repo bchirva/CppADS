@@ -1,9 +1,9 @@
 #include <gtest/gtest.h>
 
-#include <Queue.hpp>
+#include "queue.hpp"
 using CppADS::Queue;
 
-TEST(QueueTest, ConstructQueueTest)
+TEST(QueueTest, ConstructTest)
 {
     Queue<int> queue_empty;
     ASSERT_EQ(queue_empty.size(), 0);
@@ -19,7 +19,7 @@ TEST(QueueTest, ConstructQueueTest)
     ASSERT_EQ(queue_init.size(), 0);
 }
 
-TEST(QueueTest, AssignQueueTest)
+TEST(QueueTest, AssignTest)
 {
     Queue<int> queue_init { 0, 1, 2, 3, 4, 5, 6, 7, 8, 9 };
     auto init_size = queue_init.size();
@@ -27,14 +27,14 @@ TEST(QueueTest, AssignQueueTest)
     Queue<int> queue_copy;
     queue_copy = queue_init;
     ASSERT_EQ(queue_copy.size(), init_size);
-    
+
     Queue<int> queue_move;
     queue_move = std::move(queue_init);
     ASSERT_EQ(queue_move.size(), init_size);
     ASSERT_EQ(queue_init.size(), 0);
 }
 
-TEST(QueueTest, ModifyQueueTest)
+TEST(QueueTest, ModifyTest)
 {
     Queue<int> queue;
     for (int i = 100; i > 0; i--)
@@ -45,7 +45,7 @@ TEST(QueueTest, ModifyQueueTest)
 
     while(queue.size() > 50)
         queue.dequeue();
-    
+
     ASSERT_EQ(queue.size(), 50);
     ASSERT_EQ(queue.front(), 50);
 }
