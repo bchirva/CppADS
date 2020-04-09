@@ -96,6 +96,16 @@ TEST(ListTest, InsertTest)
 
     ASSERT_EQ(list, List<int>({100, -11, 0, 1, 2, 789, 3, 4, 5, 6, 7, 9000, 1234}));
     ASSERT_EQ(list.size(), 13);
+
+    list.clear();
+    for (int i = 1; i < 100; i += 10)
+        list.push_front(i);
+    ASSERT_EQ(list, List<int>({91, 81, 71, 61, 51, 41, 31, 21, 11, 1}));
+
+    list.clear();
+    for (int i = 1; i < 100; i += 10)
+        list.push_back(i);
+    ASSERT_EQ(list, List<int>({1, 11, 21, 31, 41, 51, 61, 71, 81, 91}));
 }
 
 TEST(ListTest, RemoveTest)

@@ -98,6 +98,11 @@ TEST(ArrayTest, InsertTest)
     ASSERT_EQ(array, Array<int>({100, -11, 0, 1, 2, 789, 3, 4, 5, 6, 7, 9000, 1234, 42}));
     ASSERT_EQ(array.size(), 14);
 
+    array.clear();
+    for (int i = 1; i < 100; i += 10)
+        array.push_back(i);
+    ASSERT_EQ(array, Array<int>({1, 11, 21, 31, 41, 51, 61, 71, 81, 91}));
+
     ASSERT_THROW(array.insert(42, 666), std::out_of_range);
     ASSERT_THROW(array.insert(42, array.begin() - 666), std::out_of_range);
 }

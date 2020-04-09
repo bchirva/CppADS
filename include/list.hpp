@@ -325,7 +325,7 @@ template<typename T>
 void CppADS::List<T>::clear()
 {
     while(size() != 0)
-        remove(end());
+        remove(begin());
 }
 
 template<typename T>
