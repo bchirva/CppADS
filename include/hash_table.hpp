@@ -350,7 +350,7 @@ void CppADS::HashTable<Key, T>::set_load_factor(size_t load_factor)
 template<typename Key, typename T>
 void CppADS::HashTable<Key, T>::clear()
 {
-    m_buckets.clear();
+    m_buckets = {Bucket{}};
     m_size = 0;
 }
 
@@ -573,7 +573,7 @@ bool CppADS::HashTable<Key, T>::operator!=(const HashTable<Key, T> &rhs) const
 template<typename Key, typename T>
 size_t CppADS::HashTable<Key, T>::calc_address(Key key) const
 {
-    return std::hash<Key>{}(key) % m_buckets.size();
+    return std::hash<Key>{}(key) % bucket_count();
 }
 
 #endif
