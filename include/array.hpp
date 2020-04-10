@@ -328,13 +328,9 @@ namespace CppADS
 template<typename T>
 CppADS::Array<T>::Array(const Array<T>& copy)
 {
-    m_size = copy.m_size;
-    m_capacity = copy.m_capacity;
-    m_data = std::make_unique<T[]>(m_capacity);
-    for (int i = 0; i < m_size; i++)
-    {
-        m_data[i] = copy.m_data[i];
-    }
+    reserve(copy.capacity());
+    for (auto it = copy.begin(); it != copy.end(); it++)
+        push_back(*it);
 }
 
 template<typename T>
@@ -350,26 +346,18 @@ CppADS::Array<T>::Array(Array<T>&& move)
 template<typename T>
 CppADS::Array<T>::Array(std::initializer_list<T> init_list)
 {
-    m_size = init_list.size();
-    m_capacity = m_size;
-    m_data = std::make_unique<T[]>(m_capacity);
-    int i = 0;
-    for(auto it = init_list.begin(); it != init_list.end(); it++, i++)
-    {
-        m_data[i] = *it;
-    }
+    reserve(init_list.size());
+    for (auto it = init_list.begin(); it != init_list.end(); it++)
+        push_back(*it);
 }
 
 template<typename T>
 CppADS::Array<T>& CppADS::Array<T>::operator=(const Array<T>& copy)
 {
-    m_size = copy.m_size;
-    m_capacity = copy.m_capacity;
-    m_data = std::make_unique<T[]>(m_capacity);
-    for (int i = 0; i < m_size; i++)
-    {
-        m_data[i] = copy.m_data[i];
-    }
+    clear();
+    reserve(copy.capacity());
+    for (auto it = copy.begin(); it != copy.end(); it++)
+        push_back(*it);
     return *this;
 }
 

@@ -298,7 +298,6 @@ CppADS::List<T>::List(std::initializer_list<T> init_list)
 {
     for (auto it = init_list.begin(); it != init_list.end(); it++)
         this->insert(*it, this->end());
-    m_size = init_list.size();
 }
 
 template<typename T>
