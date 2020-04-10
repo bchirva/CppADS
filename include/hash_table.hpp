@@ -298,12 +298,13 @@ template<typename Key, typename T>
 CppADS::HashTable<Key, T>::HashTable(std::initializer_list<value_type> init_list)
 {
     for(auto it = init_list.begin(); it != init_list.end(); it++)
-        insert(std::move(*it));
+        insert(*it);
 }
 
 template<typename Key, typename T>
 CppADS::HashTable<Key, T>& CppADS::HashTable<Key, T>::operator=(const HashTable& copy)
 {
+    clear();
     m_buckets = copy.m_buckets;
     m_size = copy.m_size;
     m_max_load_factor = copy.m_max_load_factor;
@@ -460,12 +461,12 @@ typename CppADS::HashTable<Key, T>::mapped_type& CppADS::HashTable<Key, T>::oper
     }
     if (bucket_it != m_buckets[address].end())
     {
-        return *bucket_it;
+        return (*bucket_it).second;
     }
     else
     {
-        insert(key, T());
-        return *find(key);
+        insert({key, T()});
+        return (*find(key)).second;
     }
 }
 
@@ -483,12 +484,12 @@ const typename CppADS::HashTable<Key, T>::mapped_type& CppADS::HashTable<Key, T>
     }
     if (bucket_it != m_buckets[address].end())
     {
-        return *bucket_it;
+        return *(bucket_it);
     }
     else
     {
-        insert(key, T());
-        return *find(key);
+        insert({key, T()});
+        return (*find(key)).second;
     }
 }
 
@@ -505,7 +506,7 @@ typename CppADS::HashTable<Key, T>::iterator CppADS::HashTable<Key, T>::find(con
         bucket_it++;
     }
     if (bucket_it != m_buckets[address].end())
-        return iterator((m_buckets.begin() + address), bucket_it);
+        return iterator((m_buckets.begin() + address), bucket_it, this);
     else
         return end();
 }
@@ -523,7 +524,7 @@ typename CppADS::HashTable<Key, T>::const_iterator CppADS::HashTable<Key, T>::fi
         bucket_it++;
     }
     if (bucket_it != m_buckets[address].end())
-        return const_iterator((m_buckets.begin() + address), bucket_it);
+        return const_iterator((m_buckets.begin() + address), bucket_it, this);
     else
         return cend();
 }
