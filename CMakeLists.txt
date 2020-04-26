@@ -12,9 +12,6 @@ target_include_directories(CppADS INTERFACE
     $<BUILD_INTERFACE:${CMAKE_CURRENT_SOURCE_DIR}/include>
     )
 
-#FILE(GLOB SOURCE_CPP ${CMAKE_CURRENT_SOURCE_DIR}/src/*.cpp)
-#target_sources(CppADS PRIVATE ${SOURCE_CPP})
-
 target_compile_features(CppADS INTERFACE cxx_std_14)
 
 set(WITH_TESTS OFF CACHE BOOL "Is tests builds required")
