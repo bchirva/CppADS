@@ -1,5 +1,7 @@
 cmake_minimum_required(VERSION 3.10)
 
+set(CMAKE_EXPORT_COMPILE_COMMANDS ON)
+
 project(CppADS
     VERSION 0.1
     DESCRIPTION "C++ implementation of algorithms and data structures"
@@ -25,3 +27,4 @@ endif()
 if(WITH_DOCS)
     add_subdirectory(docs)
 endif()
+
